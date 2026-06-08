@@ -55,3 +55,4 @@
 /home/viral-gujarati/backend-learn/TraineeManagement.Api/bin/Debug/net9.0/Microsoft.Extensions.Logging.Abstractions.dll
 /home/viral-gujarati/backend-learn/TraineeManagement.Api/bin/Debug/net9.0/Microsoft.Extensions.Options.dll
 /home/viral-gujarati/backend-learn/TraineeManagement.Api/bin/Debug/net9.0/Microsoft.Extensions.Primitives.dll
+/home/viral-gujarati/backend-learn/TraineeManagement.Api/obj/Debug/net9.0/TraineeManagement.Api.sourcelink.json

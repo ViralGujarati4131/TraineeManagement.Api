@@ -15,52 +15,49 @@ The project demonstrates:
 - Validation
 - Swagger
 
----
+
 
 ## Technology Stack
 
-- C#
-- .NET 9 
-- ASP.NET Core Web API
-- Entity Framework Core
-- EF Core InMemory Database
-- Swagger
+ C#
+ .NET 9 
+ ASP.NET Core Web API
+ Entity Framework Core
+ EF Core InMemory Database
+ Swagger
 
----
 
 ## Project Structure
 
 TraineeManagement.Api
-│
-├── Controllers
-│   ├── HealthController.cs
-│   └── TraineeController.cs
-│
-├── Models
-│   └── Trainee.cs
-│
-├── DTOs
-│   ├── CreateTraineeDto.cs
-│   ├── UpdateTraineeDto.cs
-│   └── TraineeResponseDto.cs
-│
-├── Services
-│   ├── Interfaces
-│   │   └── ITraineeService.cs
-│   │
-│   └── TraineeService.cs
-│
-├── Data
-│   └── DbContext.cs
-│
-└── Program.cs
 
----
+─ Controllers
+     ─ HealthController.cs
+     ─ TraineeController.cs
+
+─ Models
+     ─ Trainee.cs
+
+─ DTOs
+     ─ TraineeDto.cs
+
+─ Services
+     ─ Interfaces
+         ─ ITraineeServices.cs
+    
+     ─ TraineeServices.cs
+
+─ Data
+     ─ DbContext.cs
+
+─ Program.cs
+
+
 
 ## How to Run
  
 ### Clone the repo first
-
+https://github.com/ViralGujarati4131/TraineeManagement.Api.git
 ### Navigate to Project
 cd TraineeManagement.Api
 ### Restore Packages
@@ -75,38 +72,21 @@ https://localhost:<port>/swagger
 ## API Endpoints
 
 ### Health Check
-GET  /api/health 
+GET  /api/health
+# Sample GET Response
+{
+  "status": "running",
+  "application": "Trainee Management API",
+  "timestamp": "2026-06-08T13:13:44.7536409+00:00"
+}
+
+
 
 ### Trainee APIs
- GET  /api/trainees 
- GET  /api/trainees/{id} 
- POST  /api/trainees 
- PUT  /api/trainees/{id} 
- DELETE  /api/trainees/{id} 
- GET  /api/trainees?search=value 
 
 
-## Sample POST Request
-
-### POST /api/trainees
-{
-  "firstName": "Amit",
-  "lastName": "Sharma",
-  "email": "amit.sharma@training.com",
-  "techStack": "HTML, CSS, JavaScript",
-  "status": "Active"
-}
-
-
-## Sample Success Response
-{
-  "id": 1,
-  "firstName": "Amit",
-  "lastName": "Sharma"
-}
-
-## Sample GET Response
-
+ # GET  /api/trainees 
+ # Sample GET Response
 [
   {
     "id": 1,
@@ -115,17 +95,78 @@ GET  /api/health
   }
 ]
 
-## Sample Validation Error
 
-{
-  "errors": {
-    "firstName": [
-      "First name is required"
-    ],
-    "email": [
-      "Valid email is required"
-    ]
+
+# GET  /api/trainees/{id} 
+id = 1
+# Sample GetById Response
+[
+  {
+    "id": 1,
+    "firstName": "Amit",
+    "lastName": "Sharma"
   }
+]
+
+
+
+ # POST  /api/trainees 
+ {
+  "firstName": "Amit",
+  "lastName": "Sharma",
+  "email": "amit.sharma@training.com",
+  "techStack": "HTML, CSS, JavaScript",
+  "status": "Active"
+}
+# Sample Success Response
+{
+  "id": 1,
+  "firstName": "Amit",
+  "lastName": "Sharma"
 }
 
 
+
+# PUT  /api/trainees/{id} 
+id = 1
+  {
+  "firstName": "Viral",
+  "lastName": "Gujarati",
+  "email": "viral.gujarati@yahoo.com",
+  "techStack": "React Native, Node",
+  "status": "Active"
+}
+# Sample Success Response
+{
+  "id": 1,
+  "firstName": "Viral",
+  "lastName": "Gujarati"
+}
+
+
+
+ DELETE  /api/trainees/{id} 
+ id = 1
+ # Smaple Success Response
+ 204 NoContent
+
+
+
+ GET  /api/trainees?search=value 
+ search = viral
+ # Sample Success Response
+{
+  "id": 1,
+  "firstName": "Viral",
+  "lastName": "Gujarati"
+}
+
+
+# limitations
+
+data is stored is in InMemoryStorage so it clear when server restart.
+
+# Next Phase Scope
+
+We can configure database so data is persistent.
+We can create more endpoints to handle media files.
