@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.DTOs;
+using TraineeManagementApi.Models;
 using TraineeManagementApi.Service.Interface;
 
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
-// [Route("api/[controller]")]
+[Route("api/trainee")]
 public class TraineesController : ControllerBase
 {
     private readonly ITraineeService traineeService;
@@ -14,39 +15,28 @@ public class TraineesController : ControllerBase
         traineeService = service;
     }
 
-    [HttpGet("api/trainee/{id}")]
-    // [HttpGet("{id}")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<TraineeResponseDto>> GetTraineeById(int id)
     {
-        var traineeById = await traineeService.GetTraineeByIdService(id);
+        TraineeResponseDto? traineeById = await traineeService.GetTraineeByIdAsync(id);
         if (traineeById == null)
         {
             return NotFound(new { Message = $"Trainee with Id {id} not found" });
         }
         return Ok(traineeById);
     }
- 
-    [HttpPost("api/trainee")]
-    // [HttpPost]
-    public async Task<ActionResult<TraineeResponseDto>> CreateTrainee([FromBody] CreateTraineeDto trainee)
+
+    [HttpPost]
+    public async Task<ActionResult<TraineeResponseDto>> CreateTrainee([FromBody] CreateTraineeDto createTrainee)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        var t = await traineeService.CreateTraineeService(trainee);
-        return CreatedAtAction(nameof(GetTraineeById),new {id = t.Id}, t);
+        TraineeResponseDto t = await traineeService.CreateTraineeAsync(createTrainee);
+        return CreatedAtAction(nameof(GetTraineeById), new { id = t.Id }, t);
     }
 
-    [HttpPut("api/trainee/{id:int}")]
-    // [HttpPut("{id}")]
-    public async Task<ActionResult<TraineeResponseDto>> UpdateTraineeById(int id,[FromBody] UpdateTraineeDto updatedTrainee)
+    [HttpPut("{id}")]
+    public async Task<ActionResult<TraineeResponseDto>> UpdateTraineeById(int id, [FromBody] UpdateTraineeDto updatedTrainee)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        var trainee = await traineeService.UpdateTraineeService(id,updatedTrainee);
+        TraineeResponseDto? trainee = await traineeService.UpdateTraineeAsync(id, updatedTrainee);
         if (trainee == null)
         {
             return NotFound(new { Message = $"Trainee with Id {id} not found" });
@@ -54,38 +44,36 @@ public class TraineesController : ControllerBase
         return Ok(trainee);
     }
 
-    [HttpDelete("api/trainee/{id:int}")]
-    // [HttpDelete("{id}")]
+    [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteTraineeById(int id)
     {
-        if (!await traineeService.DeleteTraineeByIdService(id))
+        if (!await traineeService.DeleteTraineeByIdAsync(id))
         {
             return NotFound(new { Message = $"Trainee with Id {id} not found" });
         }
-        return StatusCode(StatusCodes.Status204NoContent);
+        return NoContent();
     }
 
-    [HttpGet("api/trainee")]
-    // [HttpGet]
-    public async Task<ActionResult<TraineeResponseDto>> GetTrainee([FromQuery] string? search)
+    [HttpGet]
+    public async Task<ActionResult<TraineeResponseDto>> GetTrainee([FromQuery] string? searchTrainee)
     {
-        if (search == null)
+        if (searchTrainee == null)
         {
-            var traineeAll = await traineeService.GetTraineeService();
+            IEnumerable<TraineeResponseDto> traineeAll = await traineeService.GetTraineeAsync();
             if (!traineeAll.Any())
             {
                 return NotFound(new { Message = "No trainee found" });
             }
             return Ok(traineeAll);
         }
-        var searchResult = await traineeService.SearchTraineesService(search);
+        IEnumerable<TraineeResponseDto> searchResult = await traineeService.SearchTraineesAsync(searchTrainee);
         if (!searchResult.Any())
         {
-            return NotFound(new { Message = $"No trainee found matching '{search}'" });
+            return NotFound(new { Message = $"No trainee found matching '{searchTrainee}'" });
         }
         return Ok(searchResult);
     }
 
- }
-    
+}
+
 

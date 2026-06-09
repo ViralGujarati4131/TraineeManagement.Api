@@ -3,18 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
-// [Route("api/[controller]")]
+[Route("api/health")]
 public class HealthController : ControllerBase
 {
-    [HttpGet("api/health")]
+    [HttpGet]
     public IActionResult GetMessage()
     {
-            return Ok(new {
-                status= "running",
-                application=  "Trainee Management API", 
-                timestamp=  DateTime.Now
-                });
-    }  
- }
-    
+        return Ok(new
+        {
+            status = "running",
+            application = "Trainee Management API",
+            timestamp = DateTime.UtcNow
+        });
+    }
+}
+
 

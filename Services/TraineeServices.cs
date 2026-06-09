@@ -1,3 +1,4 @@
+using System.Collections;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagementApi.DTOs;
 using TraineeManagementApi.Models;
@@ -9,68 +10,70 @@ public class TraineeService : ITraineeService
 {
 
     private readonly AppDbContext context;
-    public TraineeService(AppDbContext c){
+    public TraineeService(AppDbContext c)
+    {
         context = c;
     }
 
-    private TraineeResponseDto MakeResponse(Trainee t){
+    private TraineeResponseDto MakeResponse(Trainee responseTrainee)
+    {
         return new TraineeResponseDto
         {
-            Id = t.Id,
-            FirstName = t.FirstName,
-            LastName = t.LastName,
+            Id = responseTrainee.Id,
+            FirstName = responseTrainee.FirstName,
+            LastName = responseTrainee.LastName,
         };
     }
 
-    public async Task<List<TraineeResponseDto>> GetTraineeService()
+    public async Task<IEnumerable<TraineeResponseDto>> GetTraineeAsync()
     {
-        List<Trainee> t = await context.Trainees.ToListAsync();
-        List<TraineeResponseDto> res = t.Select(u => MakeResponse(u)).ToList();
+        IEnumerable<Trainee> getTrainees = await context.Trainees.ToListAsync();
+        IEnumerable<TraineeResponseDto> res = getTrainees.Select(u => MakeResponse(u)).ToList();
         return res;
     }
-    public async Task<TraineeResponseDto?> GetTraineeByIdService(int id)
+    public async Task<TraineeResponseDto?> GetTraineeByIdAsync(int id)
     {
-        var traineeGet = await context.Trainees.FindAsync(id);
-        if(traineeGet == null) return null;
-        var res = MakeResponse(traineeGet);
+        Trainee? traineeGet = await context.Trainees.FindAsync(id);
+        if (traineeGet == null) return null;
+        TraineeResponseDto res = MakeResponse(traineeGet);
         return res;
     }
-     
-     public async Task<TraineeResponseDto> CreateTraineeService(CreateTraineeDto newTrainee)
+
+    public async Task<TraineeResponseDto> CreateTraineeAsync(CreateTraineeDto newTrainee)
     {
-        var createTrainee = new Trainee
+        Trainee createTrainee = new Trainee
         {
             FirstName = newTrainee.FirstName,
             LastName = newTrainee.LastName,
             Email = newTrainee.Email,
             TechStack = newTrainee.TechStack,
             Status = newTrainee.Status,
-            CreatedDate = DateTime.Now,
-            UpdatedDate = DateTime.Now
+            CreatedDate = DateTime.UtcNow,
+            UpdatedDate = DateTime.UtcNow
         };
-        await context.Trainees.AddAsync(createTrainee);
+        context.Trainees.Add(createTrainee);
         await context.SaveChangesAsync();
-        var res = MakeResponse(createTrainee);
+        TraineeResponseDto res = MakeResponse(createTrainee);
         return res;
-    } 
-    public async Task<TraineeResponseDto?> UpdateTraineeService(int id,UpdateTraineeDto updateTrainee)
+    }
+    public async Task<TraineeResponseDto?> UpdateTraineeAsync(int id, UpdateTraineeDto updateTrainee)
     {
-        var trainee = context.Trainees.Find(id);
-        if(trainee == null) return null;
+        Trainee? trainee = await context.Trainees.FindAsync(id);
+        if (trainee == null) return null;
         trainee.FirstName = updateTrainee.FirstName;
         trainee.LastName = updateTrainee.LastName;
         trainee.Email = updateTrainee.Email;
         trainee.TechStack = updateTrainee.TechStack;
         trainee.Status = updateTrainee.Status;
-        trainee.UpdatedDate = DateTime.Now;
+        trainee.UpdatedDate = DateTime.UtcNow;
         await context.SaveChangesAsync();
-        var res = MakeResponse(trainee);
+        TraineeResponseDto res = MakeResponse(trainee);
         return res;
     }
-    public async Task<bool> DeleteTraineeByIdService(int id)
+    public async Task<bool> DeleteTraineeByIdAsync(int id)
     {
-        var traineeDelete = await context.Trainees.FindAsync(id);
-        if(traineeDelete == null)
+        Trainee? traineeDelete = await context.Trainees.FindAsync(id);
+        if (traineeDelete == null)
         {
             return false;
         }
@@ -79,16 +82,15 @@ public class TraineeService : ITraineeService
         return true;
     }
 
-    public async Task<List<TraineeResponseDto>> SearchTraineesService(string search)
+    public async Task<IEnumerable<TraineeResponseDto>> SearchTraineesAsync(string searchTrainee)
     {
-        var query = search.ToLower();
-        var res = await context.Trainees.Where
-                    (t => (t.FirstName ?? "").ToLower().Contains(query) ||
-                    (t.LastName  ?? "").ToLower().Contains(query) ||
-                    (t.Email     ?? "").ToLower().Contains(query) ||
-                    (t.TechStack ?? "").ToLower().Contains(query))
+        IEnumerable<Trainee> res = await context.Trainees.Where
+                    (t => (t.FirstName).Contains(searchTrainee) ||
+                    (t.LastName).Contains(searchTrainee) ||
+                    (t.Email).Contains(searchTrainee) ||
+                    (t.TechStack).Contains(searchTrainee))
         .ToListAsync();
-        List<TraineeResponseDto> t = res.Select(u => MakeResponse(u)).ToList();
+        IEnumerable<TraineeResponseDto> t = res.Select(u => MakeResponse(u)).ToList();
         return t;
     }
 }

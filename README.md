@@ -87,13 +87,16 @@ GET  /api/health
 
 GET  /api/trainees 
 - Sample GET Response
-- [
+- 
+```json
+[
   {
     "id": 1,
     "firstName": "Amit",
     "lastName": "Sharma"
   }
 ]
+```
 
 
 

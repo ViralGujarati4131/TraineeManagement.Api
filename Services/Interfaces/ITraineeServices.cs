@@ -4,15 +4,15 @@ namespace TraineeManagementApi.Service.Interface;
 
 public interface ITraineeService
 {
-    Task<List<TraineeResponseDto>> GetTraineeService();
+    Task<IEnumerable<TraineeResponseDto>> GetTraineeAsync();
 
-    Task<TraineeResponseDto?> GetTraineeByIdService(int id);
+    Task<TraineeResponseDto?> GetTraineeByIdAsync(int id);
 
-    Task<TraineeResponseDto> CreateTraineeService(CreateTraineeDto trainee);
+    Task<TraineeResponseDto> CreateTraineeAsync(CreateTraineeDto createTrainee);
 
-    Task<TraineeResponseDto?> UpdateTraineeService(int id, UpdateTraineeDto trainee);
+    Task<TraineeResponseDto?> UpdateTraineeAsync(int id, UpdateTraineeDto updateTrainee);
 
-    Task<bool> DeleteTraineeByIdService(int id);
+    Task<bool> DeleteTraineeByIdAsync(int id);
 
-    Task<List<TraineeResponseDto>> SearchTraineesService(string search);
+    Task<IEnumerable<TraineeResponseDto>> SearchTraineesAsync(string searchTrainee);
 }

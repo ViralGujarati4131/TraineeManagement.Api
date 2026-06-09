@@ -4,23 +4,23 @@ namespace TraineeManagementApi.DTOs;
 
 public class UpdateTraineeDto
 {
-    [Required]
-    [MaxLength(50)]    
-    public string? FirstName { get; set; }
+    [Required(ErrorMessage = "FirstName is required")]
+    [MaxLength(50, ErrorMessage = "FirstName can not be exceed 50 characters")]
+    public string FirstName { get; set; }
 
-    [Required]
-    [MaxLength(50)]
-    public string? LastName { get; set; }
+    [Required(ErrorMessage = "LastName is required")]
+    [MaxLength(50, ErrorMessage = "LastName can not be exceed 50 characters")]
+    public string LastName { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Email is required")]
     [EmailAddress]
-    public string? Email { get; set; }
+    public string Email { get; set; }
 
-    [Required]
-    public string? TechStack { get; set; }
+    [Required(ErrorMessage = "TechStack is required")]
+    public string TechStack { get; set; }
 
-    [Required]
-    [AllowedValues(TraineeStatus.Active,TraineeStatus.Inactive,TraineeStatus.Completed)]
+    [Required(ErrorMessage = "Invalid Status")]
+    [AllowedValues(TraineeStatus.Active, TraineeStatus.Inactive, TraineeStatus.Completed)]
     public TraineeStatus Status { get; set; }
 }
 
@@ -28,35 +28,29 @@ public class UpdateTraineeDto
 public class TraineeResponseDto
 {
     public int Id { get; set; }
-       
-    [Required]
-    [MaxLength(50)]    
-    public string? FirstName { get; set; }
-
-    [Required]
-    [MaxLength(50)]
-    public string? LastName { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
 }
 
 
 public class CreateTraineeDto
 {
-    [Required]
-    [MaxLength(50)]    
-    public string? FirstName { get; set; }
+    [Required(ErrorMessage = "FirstName is required")]
+    [MaxLength(50, ErrorMessage = "FirstName can not be exceed 50 characters")]
+    public string FirstName { get; set; }
 
-    [Required]
-    [MaxLength(50)]
-    public string? LastName { get; set; }
+    [Required(ErrorMessage = "LastName is required")]
+    [MaxLength(50, ErrorMessage = "LastName can not be exceed 50 characters")]
+    public string LastName { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Email is required")]
     [EmailAddress]
-    public string? Email { get; set; }
+    public string Email { get; set; }
 
-    [Required]
-    public string? TechStack { get; set; }
+    [Required(ErrorMessage = "TechStack is required")]
+    public string TechStack { get; set; }
 
-    [Required]
-    [AllowedValues(TraineeStatus.Active,TraineeStatus.Inactive,TraineeStatus.Completed)]
+    [Required(ErrorMessage = "Invalid Status")]
+    [AllowedValues(TraineeStatus.Active, TraineeStatus.Inactive, TraineeStatus.Completed)]
     public TraineeStatus Status { get; set; }
 }
