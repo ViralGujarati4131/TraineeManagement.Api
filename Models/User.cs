@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using MyApi.Models;
 
 namespace Users.Models;
 
-public class User
+public class User : ITimestamp
 {
     [Key]
     public int Id { get; set; }

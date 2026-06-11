@@ -1,30 +1,34 @@
 using Microsoft.EntityFrameworkCore;
-using PasswordHasher.Service.Interface;
 using Users.Models;
 using Users.Service.Interface;
 using Users.DTOs;
-
-// using Microsoft.AspNetCore.Authentication.JwtBearer;
-// using Microsoft.IdentityModel.Tokens;
-// using System.Text;
-// using System.Security.Claims;
+using Users.Utils;
+using Microsoft.AspNetCore.Identity;
 
 namespace Users.Service;
 
 public class UserService : IUserService
 {
     private readonly AppDbContext _context;
-    private readonly IPasswordHasherService _service;
-    //  private readonly TokenService _tokenService;
-    public UserService(AppDbContext context, IPasswordHasherService service)
+    private readonly IJwtService _jwtService;
+    private readonly ILogger<UserService> _logger;
+
+    public UserService(AppDbContext context, IJwtService jwtService, ILogger<UserService> logger)
     {
         _context = context;
-        _service = service;
-        // _tokenService = tokenService;
+        _jwtService = jwtService;
+        _logger = logger;
     }
 
+    private PasswordVerificationResult VerifyPassword(User u, string password, string hashedPassword)
+    {
+        PasswordHasher<User> ps = new PasswordHasher<User>();   
+        return ps.VerifyHashedPassword(u, hashedPassword, password);
+
+    }
     private LoginTokenResponseDto makeResponse(string t, int i, User u)
     {
+        _logger.LogInformation("Creating response for successfull login");
         return new LoginTokenResponseDto
         {
             token = t,
@@ -37,43 +41,35 @@ public class UserService : IUserService
             }
         };
     }
-    public async Task<LoginTokenResponseDto?> LoginUserAsync(UserLoginDto userLogin)
+
+    private async Task<User?> FetchUser(string username)
     {
-        User? findUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == userLogin.Username);
+        User? findUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         if (findUser == null)
         {
+            _logger.LogInformation("User not found");
             return null;
         }
-        if (_service.VerifyPassword(userLogin.Password, findUser.PasswordHash))
+        return findUser;
+    }
+
+    public async Task<LoginTokenResponseDto?> LoginUserAsync(UserLoginDto userLogin)
+    {
+        _logger.LogDebug($"Try to find the user {userLogin.Username}");
+        User? findUser = await FetchUser(userLogin.Username);
+        if (findUser == null)
         {
-            // var token = _tokenService.GenerateToken(findUser.Id,findUser.Username,(findUser.Role).ToString());
-
-
-
-            // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            // var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            // var claims = new[]
-            // {
-            //     new Claim(ClaimTypes.Name, username),
-            //     new Claim(ClaimTypes.Role, "Admin")
-            // };
-            // var token = new JwtSecurityToken(
-            //     issuer: _config["Jwt:Issuer"],
-            //     audience: _config["Jwt:Audience"],
-            //     claims: claims,
-            //     expires: DateTime.UtcNow.AddMinutes(60),
-            //     signingCredentials: credentials);
-            // return new JwtSecurityTokenHandler().WriteToken(token);
-
-
-
-
-            var token = "JWT-Token";
-            return makeResponse(token, 3600, findUser);
-        }
-        else
-        {
+            _logger.LogInformation("User not found");
             return null;
         }
+        _logger.LogDebug("Start verifing the password");
+        if (PasswordVerificationResult.Success == VerifyPassword(findUser, userLogin.Password, findUser.PasswordHash))
+        {
+            _logger.LogInformation("Password varified now go for creating the jwt token");
+            var token = _jwtService.GenerateJwtToken(findUser, out int expiryMinutes);
+            _logger.LogInformation("JwtToken created");
+            return makeResponse(token, expiryMinutes * 60, findUser);
+        }
+        return null;
     }
 }

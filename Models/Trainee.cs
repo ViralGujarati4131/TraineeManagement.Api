@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using MyApi.Models;
 
 namespace TraineeManagementApi.Models;
 
-public class Trainee
+public class Trainee : ITimestamp
 {
     [Key]
     public int Id { get; set; }

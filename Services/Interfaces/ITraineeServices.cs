@@ -15,4 +15,6 @@ public interface ITraineeService
     Task<bool> DeleteTraineeByIdAsync(int id);
 
     Task<IEnumerable<TraineeResponseDto>> SearchTraineesAsync(string searchTrainee);
+
+    Task<PaginationSearchDto?> PaginationSearchTraineeAsync(int pageNumber, int pageSize, string name, string status);
 }

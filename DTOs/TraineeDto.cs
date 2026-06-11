@@ -54,3 +54,11 @@ public class CreateTraineeDto
     [AllowedValues(TraineeStatus.Active, TraineeStatus.Inactive, TraineeStatus.Completed)]
     public TraineeStatus Status { get; set; }
 }
+
+public class PaginationSearchDto
+{
+    public int pageNumber { get; set; }
+    public int pageSize { get; set; }
+    public int totalRecords { get; set; }
+    public IEnumerable<TraineeResponseDto>? data { get; set; }
+}
