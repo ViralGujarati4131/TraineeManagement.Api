@@ -7,6 +7,7 @@ public class UserResponseDto
 {
     [Key]
     public int Id { get; set; }
+
     [Required(ErrorMessage = "Username can not be empty")]
     public string Username { get; set; } = string.Empty;
 
@@ -16,9 +17,11 @@ public class UserResponseDto
 
 public class LoginTokenResponseDto
 {
-    public string token { get; set; } = string.Empty;
-    public int expiresIn { get; set; }
-    public UserResponseDto? user { get; set; }
+    public string Token { get; set; } = string.Empty;
+
+    public int ExpiresIn { get; set; }
+
+    public UserResponseDto? User { get; set; }
 }
 
 public class UserLoginDto
@@ -28,5 +31,4 @@ public class UserLoginDto
 
     [Required(ErrorMessage = "Password can not be empty")]
     public string Password { get; set; } = string.Empty;
-
 }

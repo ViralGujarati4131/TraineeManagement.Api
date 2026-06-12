@@ -1,25 +1,30 @@
-using TraineeManagementApi.Service.Interface;
-using TraineeManagementApi.Service;
-using Microsoft.EntityFrameworkCore;
-using Users.Service.Interface;
-using Users.Utils;
-using Users.Service;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using TraineeManagementApi.Service;
+using TraineeManagementApi.Service.Interface;
+using Users.Service;
+using Users.Service.Interface;
+using Users.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+const string AllowedOriginsPolicy = "_myAllowSpecificOrigins";
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 builder.Services.AddControllers()
-.AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.Converters.Add(
-        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)
-    );
-});
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)
+        );
+    });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 46));
@@ -57,7 +62,9 @@ builder.Services.AddOpenApi("v1", options =>
 });
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key is missing."));
+var jwtKeyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key is missing from configuration.");
+var tokenSigningKey = Encoding.UTF8.GetBytes(jwtKeyString);
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -73,7 +80,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key)
+        IssuerSigningKey = new SymmetricSecurityKey(tokenSigningKey)
     };
 });
 
@@ -83,22 +90,33 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy  =>
+    options.AddPolicy(name: AllowedOriginsPolicy,
+                      policy =>
                       {
-                          policy.WithOrigins("http://localhost:3000",
-                                              "http://localhost:5173");
+                          policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
                       });
 });
 
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
-
 builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
-await UserSeeder.SeedAsync(app.Services);
+using (var scope = app.Services.CreateScope())
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        logger.LogInformation("Starting database seeding process...");
+        await UserSeeder.SeedAsync(scope.ServiceProvider);
+        logger.LogInformation("Database seeding completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -108,9 +126,14 @@ if (app.Environment.IsDevelopment())
         options.DocumentPath = "/openapi/v1.json";
     });
 }
+
 app.UseHttpsRedirection();
-app.UseCors(MyAllowSpecificOrigins);
+
+app.UseCors(AllowedOriginsPolicy);
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();

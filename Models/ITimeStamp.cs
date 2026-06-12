@@ -1,8 +1,7 @@
-namespace MyApi.Models
+namespace MyApi.Models;
+
+public interface ITimestamp
 {
-    public interface ITimestamp
-    {
-        DateTime CreatedDate { get; set; }
-        DateTime UpdatedDate { get; set; }
-    }
+    DateTime CreatedDate { get; set; }
+    DateTime UpdatedDate { get; set; }
 }

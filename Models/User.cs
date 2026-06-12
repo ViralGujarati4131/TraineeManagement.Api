@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
 using MyApi.Models;
 
 namespace Users.Models;
@@ -8,6 +7,7 @@ public class User : ITimestamp
 {
     [Key]
     public int Id { get; set; }
+
     [Required(ErrorMessage = "Username can not be empty")]
     public string Username { get; set; } = string.Empty;
 
@@ -18,10 +18,13 @@ public class User : ITimestamp
     public UserRole Role { get; set; }
 
     public DateTime CreatedDate { get; set; }
+
     public DateTime UpdatedDate { get; set; }
 }
 
 public enum UserRole
 {
-    Admin, Mentor, Trainee
+    Admin,
+    Mentor,
+    Trainee
 }

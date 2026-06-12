@@ -1,36 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
 using Users.DTOs;
 using Users.Service.Interface;
-using Users.Service;
 
 namespace Users.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-
 public class UserController : ControllerBase
 {
-    private readonly IUserService userService;
+    private readonly IUserService _userService;
     private readonly ILogger<UserController> _logger;
 
-    public UserController(IUserService service, ILogger<UserController> logger)
+    public UserController(IUserService userService, ILogger<UserController> logger)
     {
-        userService = service;
+        _userService = userService;
         _logger = logger;
-
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<LoginTokenResponseDto>> LoginUser(UserLoginDto user)
+    public async Task<ActionResult<LoginTokenResponseDto>> LoginUser([FromBody] UserLoginDto userLoginDto)
     {
-        _logger.LogInformation($"{user.Username} Try to login");
-        LoginTokenResponseDto? userAuth = await userService.LoginUserAsync(user);
-        if (userAuth == null)
+        _logger.LogInformation("Login attempt initiated for Username: {Username}", userLoginDto.Username);
+
+        var authenticationResult = await _userService.LoginUserAsync(userLoginDto);
+        if (authenticationResult == null)
         {
-            _logger.LogWarning("Login falied unauthorized User");
-            return Unauthorized();
+            _logger.LogWarning("Authentication failed. Invalid credentials for Username: {Username}", userLoginDto.Username);
+            return Unauthorized(new { Message = "Invalid username or password" });
         }
-        _logger.LogInformation($"{user.Username} Login Successfully");
-        return Ok(userAuth);
+
+        _logger.LogInformation("Authentication successful. Session token issued for Username: {Username}", userLoginDto.Username);
+        return Ok(authenticationResult);
     }
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.Models;
+
 namespace TraineeManagementApi.DTOs;
 
 public class UpdateTraineeDto
@@ -24,14 +25,14 @@ public class UpdateTraineeDto
     public TraineeStatus Status { get; set; }
 }
 
-
 public class TraineeResponseDto
 {
     public int Id { get; set; }
+
     public string FirstName { get; set; } = string.Empty;
+
     public string LastName { get; set; } = string.Empty;
 }
-
 
 public class CreateTraineeDto
 {
@@ -57,8 +58,11 @@ public class CreateTraineeDto
 
 public class PaginationSearchDto
 {
-    public int pageNumber { get; set; }
-    public int pageSize { get; set; }
-    public int totalRecords { get; set; }
-    public IEnumerable<TraineeResponseDto>? data { get; set; }
+    public int PageNumber { get; set; }
+
+    public int PageSize { get; set; }
+
+    public int TotalRecords { get; set; }
+
+    public IEnumerable<TraineeResponseDto>? Data { get; set; }
 }

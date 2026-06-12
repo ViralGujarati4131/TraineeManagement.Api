@@ -34,5 +34,7 @@ public class Trainee : ITimestamp
 
 public enum TraineeStatus
 {
-    Active, Inactive, Completed
+    Active,
+    Inactive,
+    Completed
 }

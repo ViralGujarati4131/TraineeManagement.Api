@@ -7,6 +7,10 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    public DbSet<Trainee> Trainees { get; set; }
+    
+    public DbSet<User> Users { get; set; }
+
     public override int SaveChanges()
     {
         ApplyTimestamps();
@@ -24,18 +28,14 @@ public class AppDbContext : DbContext
         var entries = ChangeTracker
             .Entries<ITimestamp>()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
         foreach (var entry in entries)
         {
             if (entry.State == EntityState.Added)
             {
                 entry.Entity.CreatedDate = DateTime.UtcNow;
-                entry.Entity.UpdatedDate = DateTime.UtcNow;
             }
-            if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.UpdatedDate = DateTime.UtcNow;
-            }
-
+            entry.Entity.UpdatedDate = DateTime.UtcNow;
         }
     }
 
@@ -55,6 +55,4 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Username)
             .IsUnique();
     }
-    public DbSet<Trainee> Trainees { get; set; }
-    public DbSet<User> Users { get; set; }
 }

@@ -1,7 +1,6 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Users.Models;
-using Microsoft.AspNetCore.Identity;
-using System.Data.SqlTypes;
 
 public class UserSeeder
 {
@@ -11,35 +10,41 @@ public class UserSeeder
     {
         _logger = logger;
     }
+
     public static async Task SeedAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        _logger ??= scope.ServiceProvider.GetService<ILogger<UserSeeder>>();
 
-        string defaultUser = "admin";
+        const string DefaultUser = "admin";
         try
         {
-            _logger?.LogDebug("Check whether the admin user is already exists or not");
-            if (!await db.Users.AnyAsync(u => u.Username == defaultUser))
+            _logger?.LogDebug("Checking whether the admin user {Username} already exists", DefaultUser);
+            
+            var userExists = await db.Users.AnyAsync(u => u.Username == DefaultUser);
+            if (!userExists)
             {
-                _logger?.LogDebug("Start creating Admin seeder user");
+                _logger?.LogInformation("Starting database seeding: Creating admin user {Username}", DefaultUser);
+                
                 var adminUser = new User
                 {
-                    Username = defaultUser,
+                    Username = DefaultUser,
                     Role = UserRole.Admin
                 };
-                PasswordHasher<User> ps = new PasswordHasher<User>();
-                adminUser.PasswordHash = ps.HashPassword(adminUser, "Admin@123");
                 
-                db.Users.Add(adminUser);
+                var passwordHasher = new PasswordHasher<User>();
+                adminUser.PasswordHash = passwordHasher.HashPassword(adminUser, "Admin@123");
+                
+                await db.Users.AddAsync(adminUser);
                 await db.SaveChangesAsync();
                 
+                _logger?.LogInformation("Admin user {Username} seeded successfully", DefaultUser);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("An error occurred: " + ex);
+            _logger?.LogError(ex, "An error occurred while seeding the admin user {Username}", DefaultUser);
         }
-
     }
 }

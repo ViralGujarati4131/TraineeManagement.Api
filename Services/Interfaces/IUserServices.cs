@@ -4,5 +4,5 @@ namespace Users.Service.Interface;
 
 public interface IUserService
 {
-    public Task<LoginTokenResponseDto?> LoginUserAsync(UserLoginDto userLogin);
+    Task<LoginTokenResponseDto?> LoginUserAsync(UserLoginDto userLoginDto);
 }

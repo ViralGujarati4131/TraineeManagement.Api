@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.DTOs;
+using TraineeManagementApi.Models;
 using TraineeManagementApi.Service.Interface;
 
 namespace TraineeManagement.Api.Controllers;
@@ -10,102 +11,117 @@ namespace TraineeManagement.Api.Controllers;
 [Authorize]
 public class TraineesController : ControllerBase
 {
-    private readonly ITraineeService traineeService;
+    private readonly ITraineeService _traineeService;
     private readonly ILogger<TraineesController> _logger;
-    public TraineesController(ITraineeService service,ILogger<TraineesController> logger)
+
+    public TraineesController(ITraineeService traineeService, ILogger<TraineesController> logger)
     {
-        traineeService = service;
+        _traineeService = traineeService;
         _logger = logger;
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<TraineeResponseDto>> GetTraineeById(int id)
     {
-        _logger.LogDebug("Calling the tainee service for get user by id");
-        TraineeResponseDto? traineeById = await traineeService.GetTraineeByIdAsync(id);
-        if (traineeById == null)
+        _logger.LogDebug("Invoking trainee service to retrieve profile for TraineeId: {TraineeId}", id);
+        
+        TraineeResponseDto? trainee = await _traineeService.GetTraineeByIdAsync(id);
+        if (trainee == null)
         {
-            _logger.LogWarning($"For get trainee with Id {id} not found");
+            _logger.LogWarning("Retrieval failed. Trainee with ID {TraineeId} was not found", id);
             return NotFound(new { Message = $"Trainee with Id {id} not found" });
         }
-        return Ok(traineeById);
+        
+        return Ok(trainee);
     }
 
     [HttpPost]
-    public async Task<ActionResult<TraineeResponseDto>> CreateTrainee([FromBody] CreateTraineeDto createTrainee)
+    public async Task<ActionResult<TraineeResponseDto>> CreateTrainee([FromBody] CreateTraineeDto createTraineeDto)
     {
-        _logger.LogDebug("Calling the tainee service for creating trainee");
-        TraineeResponseDto t = await traineeService.CreateTraineeAsync(createTrainee);
-        return CreatedAtAction(nameof(GetTraineeById), new { id = t.Id }, t);
+        _logger.LogDebug("Invoking trainee service to establish a new trainee registration");
+        
+        TraineeResponseDto createdTrainee = await _traineeService.CreateTraineeAsync(createTraineeDto);
+        
+        return CreatedAtAction(nameof(GetTraineeById), new { id = createdTrainee.Id }, createdTrainee);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<TraineeResponseDto>> UpdateTraineeById(int id, [FromBody] UpdateTraineeDto updatedTrainee)
+    public async Task<ActionResult<TraineeResponseDto>> UpdateTraineeById(int id, [FromBody] UpdateTraineeDto updateTraineeDto)
     {
-         _logger.LogDebug("Calling the trainee service for updating trainee by id");
-        TraineeResponseDto? trainee = await traineeService.UpdateTraineeAsync(id, updatedTrainee);
-        if (trainee == null)
+        _logger.LogDebug("Invoking trainee service to modify records for TraineeId: {TraineeId}", id);
+        
+        TraineeResponseDto? updatedTrainee = await _traineeService.UpdateTraineeAsync(id, updateTraineeDto);
+        if (updatedTrainee == null)
         {
-            _logger.LogWarning($"For update trainee with Id {id} not found");
+            _logger.LogWarning("Update failed. Trainee with ID {TraineeId} was not found", id);
             return NotFound(new { Message = $"Trainee with Id {id} not found" });
         }
-        return Ok(trainee);
+        
+        return Ok(updatedTrainee);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteTraineeById(int id)
     {
-         _logger.LogDebug("Calling the trainee service for delete trainee by id");
-        if (!await traineeService.DeleteTraineeByIdAsync(id))
+        _logger.LogDebug("Invoking trainee service to delete records for TraineeId: {TraineeId}", id);
+        
+        bool isDeleted = await _traineeService.DeleteTraineeByIdAsync(id);
+        if (!isDeleted)
         {
-             _logger.LogWarning($"For delete trainee with Id {id} not found");
+            _logger.LogWarning("Deletion failed. Trainee with ID {TraineeId} was not found", id);
             return NotFound(new { Message = $"Trainee with Id {id} not found" });
         }
+        
         return NoContent();
     }
 
     [HttpGet]
-    public async Task<ActionResult<TraineeResponseDto>> GetTrainee([FromQuery] string? searchTrainee)
+    public async Task<ActionResult<IEnumerable<TraineeResponseDto>>> GetTrainees([FromQuery] string? searchTrainee)
     {
         if (searchTrainee == null)
         {
-            _logger.LogDebug("Calling the trainee service for get all trainee");
-            IEnumerable<TraineeResponseDto> traineeAll = await traineeService.GetTraineeAsync();
-            if (!traineeAll.Any())
+            _logger.LogDebug("Invoking trainee service to fetch all trainees");
+            
+            IEnumerable<TraineeResponseDto?> trainees = await _traineeService.GetTraineesAsync();
+            if (!trainees.Any())
             {
-                _logger.LogWarning("No trainee found");
+                _logger.LogWarning("Trainee collection catalog is empty. No records found");
                 return NotFound(new { Message = "No trainee found" });
             }
-            return Ok(traineeAll);
+            
+            return Ok(trainees);
         }
-         _logger.LogDebug($"Calling the trainee service for get trainee whose name|email|techstack is {searchTrainee}");
-        IEnumerable<TraineeResponseDto> searchResult = await traineeService.SearchTraineesAsync(searchTrainee);
-        if (!searchResult.Any())
+
+        _logger.LogDebug("Invoking trainee service to query profiles matching search criteria: {SearchTerm}", searchTrainee);
+        
+        IEnumerable<TraineeResponseDto?> searchResults = await _traineeService.SearchTraineesAsync(searchTrainee);
+        if (!searchResults.Any())
         {
-             _logger.LogWarning($"No trainee found matching {searchTrainee}");
+            _logger.LogWarning("Query execution returned zero matching results for criteria: {SearchTerm}", searchTrainee);
             return NotFound(new { Message = $"No trainee found matching '{searchTrainee}'" });
         }
-        return Ok(searchResult);
+        
+        return Ok(searchResults);
     }
 
     [HttpGet("paginationSearch")]
-    public async Task<ActionResult<PaginationSearchDto>> PaginationSearchTrainee([FromQuery] int pageNumber, int pageSize, string? name, string? status)
+    public async Task<ActionResult<PaginationSearchDto>> PaginationSearchTrainee([FromQuery] int pageNumber, [FromQuery] int pageSize, [FromQuery] string? name, [FromQuery] string? status)
     {
         if (pageNumber <= 0 || pageSize <= 0 || name == null || status == null)
         {
-            _logger.LogWarning("Search trainee with name|status with pagination require all parameter");
+            _logger.LogWarning("Pagination request processing aborted due to missing or invalid filter arguments");
             return BadRequest(new { Message = "All fields are require" });
         }
-         _logger.LogDebug($"Calling the trainee service for search trainee matching name is {name} status is {status} with pagination");
-        PaginationSearchDto? getData = await traineeService.PaginationSearchTraineeAsync(pageNumber, pageSize, name, status);
-        if (getData == null)
+
+        _logger.LogDebug("Invoking trainee service to generate paginated lookup - Name: {FilterName}, Status: {FilterStatus}, Page: {PageNumber}, Size: {PageSize}", name, status, pageNumber, pageSize);
+        
+        PaginationSearchDto? pagedData = await _traineeService.GetPagedAndSearchedTraineesAsync(pageNumber, pageSize, name, status);
+        if (pagedData == null)
         {
-            _logger.LogWarning($"No trainee found in page number {pageNumber} matching name = '{name}' status = '{status}'");
-            return NotFound(new { Message = $"No trainee found in page number {pageNumber} matching name = '{name}' status = '{status}'"});
+            _logger.LogWarning("Paginated request no results on Page: {PageNumber} for target Name: {FilterName} and Status: {FilterStatus}", pageNumber, name, status);
+            return NotFound(new { Message = $"No trainee found in page number {pageNumber} matching name = '{name}' status = '{status}'" });
         }
-        return Ok(getData);
+        
+        return Ok(pagedData);
     }
-
 }
-
-

@@ -1,175 +1,293 @@
 # TraineeManagement.Api
 
-## Project Overview
-
-TraineeManagement.Api is an ASP.NET Core Web API developed for managing trainee records.
-
-The project demonstrates:
-
-- ASP.NET Core Web API
-- Controllers
-- DTOs
-- Service Layer
-- EF Core InMemory Database
-- CRUD Operations
-- Validation
-- Swagger
-
-
+---
 
 ## Technology Stack
 
- C#
- .NET 9 
- ASP.NET Core Web API
- Entity Framework Core
- EF Core InMemory Database
- Swagger
+| Layer | Technology |
+|---|---|
+| Language | C# (.NET 9) |
+| Framework | ASP.NET Core Web API |
+| ORM | Entity Framework Core (Code First) |
+| Database | MySQL |
+| Authentication | JWT Bearer Token |
+| Password Hashing | ASP.NET Core PasswordHasher |
+| Documentation | Swagger / OpenAPI |
+| Logging | ASP.NET Core Built-in Logging |
 
+---
 
 ## Project Structure
 
-TraineeManagement.Api
+```
+TraineeManagement.Api/
+├── Controllers/
+│   ├── HealthController.cs
+│   ├── TraineesController.cs
+│   ├── UserController.cs
+├── Models/
+│   ├── Trainee.cs
+│   ├── User.cs
+├── DTOs/
+│   ├── TraineeDto/
+│   ├── UserDto/
+├── Services/
+│   ├── ITraineeServices.cs / TraineeServices.cs
+│   ├── IUserServices.cs / AuthServices.cs
+├── Data/
+│   └── DbContext.cs
+├── Migrations/
+├── appsettings.json
+└── Program.cs
+```
 
-─ Controllers
-     ─ HealthController.cs
-     ─ TraineeController.cs
+---
 
-─ Models
-     ─ Trainee.cs
+## Backend Setup Steps
 
-─ DTOs
-     ─ TraineeDto.cs
+### Prerequisites
 
-─ Services
-     ─ Interfaces
-         ─ ITraineeServices.cs
-    
-     ─ TraineeServices.cs
+- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+- [MySQL Server 8.x](https://dev.mysql.com/downloads/mysql/)I
 
-─ Data
-     ─ DbContext.cs
+### 1. Clone the Repository
 
-─ Program.cs
-
-
-
-## How to Run
- 
-### Clone the repo first
-https://github.com/ViralGujarati4131/TraineeManagement.Api.git
-### Navigate to Project
+```bash
+git clone <https://github.com/ViralGujarati4131/TraineeManagement.Api>
 cd TraineeManagement.Api
-### Restore Packages
+```
+
+### 2. Restore NuGet Packages Clean Project And Build It
+
+```bash
 dotnet restore
-### Run Application
+dotnet clean
+dotnet build
+```
+
+---
+
+## MySQL Setup Steps
+
+### 1. Create the Database
+
+Log in to MySQL and run:
+
+```sql
+CREATE DATABASE trainee_management_db;
+```
+
+### 2. Configure Connection String
+
+Update `appsettings.json` with your MySQL credentials:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "server=localhost;port=3306;database=trainee_management_db;user=root;password=your_password;"
+  }
+}
+```
+
+### 3. Start Mysql
+
+```bash
+dotnet service mysql start
+```
+
+---
+
+## EF Core Migration Commands
+
+```bash
+dotnet ef database update
+```
+
+---
+
+## Running the API
+
+```bash
 dotnet run
+```
 
-### Open Swagger
+Swagger UI is available at:
+
+```
 https://localhost:<port>/swagger
+```
 
+---
 
-## API Endpoints
+## Login Credentials for Testing
+
+> Seed an Admin user during application startup.
+
+| Field | Value |
+|---|---|
+| Username | `admin` |
+| Password | `Admin@123` |
+
+---
+
+## JWT Usage Instructions
+
+### Step 1 — Login to Get Token
+
+**POST** `/api/auth/login`
+
+```json
+{
+  "username": "admin",
+  "password": "Admin@123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "token": "<jwt-token-value>",
+  "expiresIn": 3600,
+  "user": {
+    "id": 1,
+    "username": "admin",
+    "role": "Admin"
+  }
+}
+```
+
+### Step 2 — Swagger UI (JWT Setup)
+
+1. Click **Authorize** button in Swagger UI.
+2. Enter: `Bearer <your-token>`
+3. Click **Authorize**, then close the dialog.
+4. All subsequent requests will include the token automatically.
+
+---
+
+## API List
+
+### Public APIs (No Token Required)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/health` | Health check |
+| POST | `/api/auth/login` | Login and get JWT token |
+
+### Trainee APIs (Protected)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/trainees?search` | Get all trainees (Name|Email|Techstack) |
+| GET | `/api/trainees/paginationSearch?pageNumber=1&pageSize=10&search=amit&status=Active` | Get all trainees (paginated) |
+| GET | `/api/trainees/{id}` | Get trainee by ID |
+| POST | `/api/trainees` | Create a new trainee |
+| PUT | `/api/trainees/{id}` | Update trainee details |
+| DELETE | `/api/trainees/{id}` | Delete a trainee |
+
+---
+
+## Sample Request & Response JSON
 
 ### Health Check
-GET  /api/health
-- Sample Get Health Response
+
+**GET** `/api/health`
+
+```json
 {
   "status": "running",
   "application": "Trainee Management API",
-  "timestamp": "2026-06-08T13:13:44.7536409+00:00"
+  "timestamp": "2026-06-11T10:30:00"
 }
-
-
-
-### Trainee APIs
-
-
-GET  /api/trainees 
-- Sample GET Response
-- 
-```json
-[
-  {
-    "id": 1,
-    "firstName": "Amit",
-    "lastName": "Sharma"
-  }
-]
 ```
 
+---
 
+### Create Trainee
 
-GET  /api/trainees/{id} 
-- id = 1
-- Sample GetById Response
-[
-  {
-    "id": 1,
-    "firstName": "Amit",
-    "lastName": "Sharma"
-  }
-]
+**POST** `/api/trainees`
 
-
-
-POST  /api/trainees 
-- {
+Request:
+```json
+{
   "firstName": "Amit",
   "lastName": "Sharma",
   "email": "amit.sharma@training.com",
   "techStack": "HTML, CSS, JavaScript",
   "status": "Active"
 }
--  Sample Success Response
+```
+
+Response `201 Created`:
+```json
 {
   "id": 1,
   "firstName": "Amit",
   "lastName": "Sharma"
 }
+```
 
+---
 
+### Get Trainees with Pagination
 
-PUT  /api/trainees/{id} 
-- id = 1
--  {
-  "firstName": "Viral",
-  "lastName": "Gujarati",
-  "email": "viral.gujarati@yahoo.com",
-  "techStack": "React Native, Node",
-  "status": "Active"
-}
-- Sample Success Response
+**GET** `/api/trainees?pageNumber=1&pageSize=10&search=amit&status=Active`
+
+Response `200 OK`:
+```json
 {
-  "id": 1,
-  "firstName": "Viral",
-  "lastName": "Gujarati"
+  "pageNumber": 1,
+  "pageSize": 10,
+  "totalRecords": 25,
+  "data": [
+    {
+      "id": 1,
+      "firstName": "Amit",
+      "lastName": "Sharma"
+    }
+  ]
 }
+```
+---
 
+## CORS Configuration
 
+CORS is configured to allow the React frontend origins:
 
-DELETE  /api/trainees/{id} 
-- id = 1
- - Smaple Success Response
- 204 NoContent
+- `http://localhost:3000`
+- `http://localhost:5173`
 
+---
 
+## Security Checklist (OWASP API Security)
 
-GET  /api/trainees?search=value 
-- search = viral
- - Sample Success Response
-{
-  "id": 1,
-  "firstName": "Viral",
-  "lastName": "Gujarati"
-}
+| Security Area | Implementation |
+|---|---|
+| Authentication | JWT bearer token validation enabled |
+| Authorization | All APIs except `/api/health` and `/api/auth/login` require a valid token |
+| Password storage | Passwords stored as hash only — plain text never stored or logged |
+| Excessive data exposure | DTOs used for all responses; `PasswordHash` never returned |
+| Injection prevention | EF Core parameterized queries used; no raw unsafe SQL |
+| Security misconfiguration | CORS restricted to known React dev origins |
+| Logging | Passwords, tokens, and sensitive data never logged |
 
+---
 
-## limitations
+## Logging
 
-- data is stored is in InMemoryStorage so it clear when server restart.
+The following events are logged:
 
-## Next Phase Scope
+- User login success and failure
+- Trainee created, updated, and deleted
+- Record-not-found (404) cases
+- Unexpected exceptions
 
-- We can configure database so data is persistent.
-- We can create more endpoints to handle media files.
+---
+
+## Known Limitations
+
+---
+
+## Next Improvement Areas
+

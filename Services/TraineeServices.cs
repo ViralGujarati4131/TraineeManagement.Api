@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Collections;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagementApi.DTOs;
 using TraineeManagementApi.Models;
@@ -8,142 +8,147 @@ namespace TraineeManagementApi.Service;
 
 public class TraineeService : ITraineeService
 {
-
-    private readonly AppDbContext context;
+    private readonly AppDbContext _context;
     private readonly ILogger<TraineeService> _logger;
-    public TraineeService(AppDbContext c,ILogger<TraineeService> logger)
+
+    public TraineeService(AppDbContext context, ILogger<TraineeService> logger)
     {
-        context = c;
+        _context = context;
         _logger = logger;
     }
 
-    private TraineeResponseDto MakeResponse(Trainee responseTrainee)
+    private TraineeResponseDto MapToResponseDto(Trainee trainee)
     {
         return new TraineeResponseDto
         {
-            Id = responseTrainee.Id,
-            FirstName = responseTrainee.FirstName,
-            LastName = responseTrainee.LastName,
+            Id = trainee.Id,
+            FirstName = trainee.FirstName,
+            LastName = trainee.LastName,
         };
     }
 
-    private async Task<Trainee?> FetchTrainee(int id)
+    private async Task<Trainee?> FetchTraineeByIdInternalAsync(int id)
     {
-      Trainee? findTrainee = await context.Trainees.FindAsync(id);
-        if (findTrainee == null)
+        Trainee? trainee = await _context.Trainees.FindAsync(id);
+        if (trainee == null)
         {
-            _logger.LogInformation("User not found");
+            _logger.LogWarning("Trainee with ID {TraineeId} was not found", id);
             return null;
         }
-        return findTrainee;
+        return trainee;
     }
 
-    public async Task<IEnumerable<TraineeResponseDto>> GetTraineeAsync()
+    public async Task<IEnumerable<TraineeResponseDto>> GetTraineesAsync()
     {
-         _logger.LogDebug("Fetching all trainees");
-        IEnumerable<Trainee> getTrainees = await context.Trainees.ToListAsync();
-        IEnumerable<TraineeResponseDto> res = getTrainees.Select(u => MakeResponse(u));
-        return res;
+        _logger.LogDebug("Fetching all trainees from the database");
+        IEnumerable<Trainee> trainees = await _context.Trainees.ToListAsync();
+        return trainees.Select(MapToResponseDto);
     }
+
     public async Task<TraineeResponseDto?> GetTraineeByIdAsync(int id)
     {
-        _logger.LogDebug($"Finding the trainee whose id is {id}");
-        Trainee? traineeGet = await FetchTrainee(id);
-        if (traineeGet == null) return null;
-        TraineeResponseDto res = MakeResponse(traineeGet);
-        return res;
+        _logger.LogDebug("Retrieving trainee profile with ID: {TraineeId}", id);
+        Trainee? trainee = await FetchTraineeByIdInternalAsync(id);
+        if (trainee == null) return null;
+        return MapToResponseDto(trainee);
     }
 
-    public async Task<TraineeResponseDto> CreateTraineeAsync(CreateTraineeDto newTrainee)
+    public async Task<TraineeResponseDto> CreateTraineeAsync(CreateTraineeDto createTraineeDto)
     {
-        Trainee createTrainee = new Trainee
+        Trainee trainee = new Trainee
         {
-            FirstName = newTrainee.FirstName,
-            LastName = newTrainee.LastName,
-            Email = newTrainee.Email,
-            TechStack = newTrainee.TechStack,
-            Status = newTrainee.Status
+            FirstName = createTraineeDto.FirstName,
+            LastName = createTraineeDto.LastName,
+            Email = createTraineeDto.Email,
+            TechStack = createTraineeDto.TechStack,
+            Status = createTraineeDto.Status
         };
-        context.Trainees.Add(createTrainee);
-        await context.SaveChangesAsync();
-        _logger.LogInformation($"Trainee {newTrainee.FirstName} created");
-        TraineeResponseDto res = MakeResponse(createTrainee);
-        return res;
+
+        await _context.Trainees.AddAsync(trainee);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully created new trainee with ID {TraineeId} and FirstName {FirstName}", trainee.Id, trainee.FirstName);
+        return MapToResponseDto(trainee);
     }
-    public async Task<TraineeResponseDto?> UpdateTraineeAsync(int id, UpdateTraineeDto updateTrainee)
+
+    public async Task<TraineeResponseDto?> UpdateTraineeAsync(int id, UpdateTraineeDto updateTraineeDto)
     {
-        _logger.LogDebug("Finding the trainee by id for update");
-        Trainee? trainee = await FetchTrainee(id);
+        _logger.LogDebug("Locating trainee with ID {TraineeId} for modifications", id);
+        Trainee? trainee = await FetchTraineeByIdInternalAsync(id);
         if (trainee == null) return null;
-        trainee.FirstName = updateTrainee.FirstName;
-        trainee.LastName = updateTrainee.LastName;
-        trainee.Email = updateTrainee.Email;
-        trainee.TechStack = updateTrainee.TechStack;
-        trainee.Status = updateTrainee.Status;
-        await context.SaveChangesAsync();
-        _logger.LogInformation($"Trainee {updateTrainee.FirstName} updated");
-        TraineeResponseDto res = MakeResponse(trainee);
-        return res;
+
+        trainee.FirstName = updateTraineeDto.FirstName;
+        trainee.LastName = updateTraineeDto.LastName;
+        trainee.Email = updateTraineeDto.Email;
+        trainee.TechStack = updateTraineeDto.TechStack;
+        trainee.Status = updateTraineeDto.Status;
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully updated trainee profile for ID {TraineeId}", id);
+        return MapToResponseDto(trainee);
     }
+
     public async Task<bool> DeleteTraineeByIdAsync(int id)
     {
-        _logger.LogDebug("Finding the trainee by id for delete");
-        Trainee? traineeDelete = await FetchTrainee(id);
-        if (traineeDelete == null)
+        _logger.LogDebug("Find trainee with ID {TraineeId} for delete", id);
+        Trainee? trainee = await FetchTraineeByIdInternalAsync(id);
+        if (trainee == null)
         {
             return false;
         }
-         _logger.LogInformation($"Trainee {traineeDelete.FirstName} deleted");
-        context.Trainees.Remove(traineeDelete);
-        await context.SaveChangesAsync();
+
+        _context.Trainees.Remove(trainee);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully deleted trainee record with ID {TraineeId}", id);
         return true;
     }
 
-    public async Task<IEnumerable<TraineeResponseDto>> SearchTraineesAsync(string searchTrainee)
+    public async Task<IEnumerable<TraineeResponseDto>> SearchTraineesAsync(string searchTerm)
     {
-        _logger.LogDebug($"Finding the trainee for matching {searchTrainee}");   
-        IEnumerable<Trainee> res = await context.Trainees.Where
-                    (t => (t.FirstName).Contains(searchTrainee) ||
-                    (t.LastName).Contains(searchTrainee) ||
-                    (t.Email).Contains(searchTrainee) ||
-                    (t.TechStack).Contains(searchTrainee))
-        .ToListAsync();
-        IEnumerable<TraineeResponseDto> t = res.Select(u => MakeResponse(u)).ToList();
-        return t;
+        _logger.LogDebug("Executing text search match for: {SearchTerm}", searchTerm);
+        
+        IEnumerable<Trainee> matchingTrainees = await _context.Trainees
+            .Where(t => t.FirstName.Contains(searchTerm) ||
+                        t.LastName.Contains(searchTerm) ||
+                        t.Email.Contains(searchTerm) ||
+                        t.TechStack.Contains(searchTerm))
+            .ToListAsync();
+
+        return matchingTrainees.Select(MapToResponseDto).ToList();
     }
 
-    public async Task<PaginationSearchDto?> PaginationSearchTraineeAsync(int pageNumber, int pageSize, string name, string status)
+    public async Task<PaginationSearchDto?> GetPagedAndSearchedTraineesAsync(int pageNumber, int pageSize, string name, string status)
     {
-        _logger.LogDebug($"Finding the trainee for matching name is {name} status is {status}");   
-        IEnumerable<Trainee> Data = await context.Trainees.Where
-            (t => (t.FirstName).Equals(name) &&
-            (t.Status).ToString().Equals(status))
-        .ToListAsync();
+        _logger.LogDebug("Executing target filter parameters - Name: {FilterName}, Status: {FilterStatus}", name, status);
 
+        IEnumerable<Trainee> query = await _context.Trainees
+            .Where(t => t.FirstName.Equals(name) && t.Status.ToString().Equals(status)).ToListAsync();
 
-        int totalRecords = Data.Count();
-        _logger.LogDebug($"Adding pagination wiht page size {pageSize}");
-        IEnumerable<Trainee> getData = Data
-            .OrderBy(p => p.Id)
+        int totalRecords = query.Count();
+
+        _logger.LogDebug("Applying pagination layout offset values - Page size: {PageSize}, Offset index: {Offset}", pageSize, (pageNumber - 1) * pageSize);
+        
+        IEnumerable<Trainee> pagedData = query
+            .OrderBy(t => t.Id)
             .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize);
+            .Take(pageSize)
+            .ToList();
 
-        if (!getData.Any())
+        if (!pagedData.Any())
         {
             return null;
         }
 
-        IEnumerable<TraineeResponseDto> responseData = getData.Select(t => MakeResponse(t)).ToList();
+        IEnumerable<TraineeResponseDto> responseData = pagedData.Select(MapToResponseDto).ToList();
 
-        PaginationSearchDto response = new PaginationSearchDto
+        return new PaginationSearchDto
         {
-            pageNumber = pageNumber,
-            pageSize = getData.Count(),
-            totalRecords = totalRecords,
-            data = responseData
+            PageNumber = pageNumber,
+            PageSize = pagedData.Count(),
+            TotalRecords = totalRecords,
+            Data = responseData
         };
-
-        return response;
     }
 }
-
