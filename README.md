@@ -6,7 +6,7 @@
 
 | Layer | Technology |
 |---|---|
-| Language | C# (.NET 9) |
+| Language | C#(.NET 9) |
 | Framework | ASP.NET Core Web API |
 | ORM | Entity Framework Core (Code First) |
 | Database | MySQL |
