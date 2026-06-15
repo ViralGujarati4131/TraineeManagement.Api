@@ -3,6 +3,7 @@ using TraineeManagementApi.LearningTasks.DTOs;
 using TraineeManagementApi.LearningTasks.Models;
 using TraineeManagementApi.LearningTasks.ServiceInterface;
 using TraineeManagementApi.Utils.CustomException;
+using Mapster;
 
 namespace TraineeManagementApi.LearningTasks.Service;
 
@@ -41,8 +42,8 @@ public class LearningTaskService : ILearningTaskService
     public async Task<IEnumerable<LearningTaskResposeDto>> GetLearningTaskAsync()
     {
         _logger.LogDebug("Fetching all learning-tasks from the database");
-        IEnumerable<LearningTask> learningTasks = await _context.LearningTasks.ToListAsync();
-        return learningTasks.Select(t => MapToResponseDto(t));
+        IEnumerable<LearningTaskResposeDto> learningTasks = await _context.LearningTasks.ProjectToType<LearningTaskResposeDto>().ToListAsync();
+        return learningTasks;
     }
     public async Task<LearningTaskResposeDto> GetLearningTaskByIdAsync(int id)
     {

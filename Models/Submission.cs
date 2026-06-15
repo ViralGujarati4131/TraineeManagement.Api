@@ -24,7 +24,7 @@ public class Submission
     [EnumDataType(typeof(SubmissionStatus), ErrorMessage = "Invalid Status")]
     public SubmissionStatus Status { get; set; }
 
-    public IEnumerable<Review> Reviews { get; set; } = new List<Review>();
+    public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
 
 public enum SubmissionStatus

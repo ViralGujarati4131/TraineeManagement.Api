@@ -3,6 +3,7 @@ using TraineeManagementApi.Reviews.DTOs;
 using TraineeManagementApi.Reviews.Models;
 using TraineeManagementApi.Reviews.ServiceInterface;
 using TraineeManagementApi.Utils.CustomException;
+using Mapster;
 
 namespace TraineeManagementApi.Reviews.Service;
 
@@ -62,8 +63,8 @@ public class ReviewService : IReviewService
     public async Task<IEnumerable<ReviewResponseDto>> GetReviewsAsync()
     {
         _logger.LogDebug("Fetching all reviews from the database");
-        IEnumerable<Review> reviews = await _context.Reviews.ToListAsync();
-        return reviews.Select(r => MapToResponseDto(r));
+        IEnumerable<ReviewResponseDto> reviews = await _context.Reviews.ProjectToType<ReviewResponseDto>().ToListAsync();
+        return reviews;
     }
 
     public async Task<ReviewResponseDto> GetReviewByIdAsync(int id)

@@ -3,6 +3,7 @@ using TraineeManagementApi.Trainees.DTOs;
 using TraineeManagementApi.Trainees.Models;
 using TraineeManagementApi.Trainees.ServiceInterface;
 using TraineeManagementApi.Utils.CustomException;
+using Mapster;
 
 namespace TraineeManagementApi.Trainees.Service;
 
@@ -41,8 +42,8 @@ public class TraineeService : ITraineeService
     public async Task<IEnumerable<TraineeResponseDto>> GetTraineesAsync()
     {
         _logger.LogDebug("Fetching all trainees from the database");
-        IEnumerable<Trainee> trainees = await _context.Trainees.ToListAsync();
-        return trainees.Select(t => MapToResponseDto(t));
+        IEnumerable<TraineeResponseDto> trainees = await _context.Trainees.ProjectToType<TraineeResponseDto>().ToListAsync();
+        return trainees;
     }
 
     public async Task<TraineeResponseDto> GetTraineeByIdAsync(int id)
@@ -95,32 +96,35 @@ public class TraineeService : ITraineeService
     public async Task<IEnumerable<TraineeResponseDto>> SearchTraineesAsync(string searchTerm)
     {
         _logger.LogDebug("Executing text search match for: {SearchTerm}", searchTerm);
-        IEnumerable<Trainee> matchingTrainees = await _context.Trainees
+        IEnumerable<TraineeResponseDto> matchingTrainees = await _context.Trainees
             .Where(t => t.FirstName.Contains(searchTerm) ||
                         t.LastName.Contains(searchTerm) ||
                         t.Email.Contains(searchTerm) ||
                         t.TechStack.Contains(searchTerm))
-            .ToListAsync();
-        return matchingTrainees.Select(t => MapToResponseDto(t));
+            .ProjectToType<TraineeResponseDto>().ToListAsync();
+        return matchingTrainees;
     }
 
     public async Task<TraineePaginationSearchDto> GetPagedAndSearchedTraineesAsync(int pageNumber, int pageSize, string name, string status)
     {
         _logger.LogDebug("Executing target filter parameters - Name: {FilterName}, Status: {FilterStatus}", name, status);
-        IEnumerable<Trainee> query = await _context.Trainees
-            .Where(t => t.FirstName.Equals(name) && t.Status.ToString().Equals(status)).ToListAsync();
-        int totalRecords = query.Count();
-        _logger.LogDebug("Applying pagination layout offset values - Page size: {PageSize}, Offset index: {Offset}", pageSize, (pageNumber - 1) * pageSize);
-        IEnumerable<Trainee> pagedData = query
+        IQueryable<Trainee> query = _context.Trainees.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(name))
+            query = query.Where(t => t.FirstName.Contains(name));
+        if (!string.IsNullOrWhiteSpace(status))
+            query = query.Where(t => t.Status.ToString() == status);
+        int totalRecords = await query.CountAsync();
+        _logger.LogDebug("Applying pagination - Page size: {PageSize}, Offset: {Offset}", pageSize, (pageNumber - 1) * pageSize);
+        IEnumerable<TraineeResponseDto> responseData = await query
             .OrderBy(t => t.Id)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
-        IEnumerable<TraineeResponseDto> responseData = pagedData.Select(MapToResponseDto).ToList();
-        return new TraineePaginationSearchDto
-        (
+            .ProjectToType<TraineeResponseDto>() 
+            .ToListAsync();
+
+        return new TraineePaginationSearchDto(
             pageNumber,
-            pagedData.Count(),
+            responseData.Count(),
             totalRecords,
             responseData
         );

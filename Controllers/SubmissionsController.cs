@@ -5,7 +5,6 @@ using TraineeManagementApi.Submissions.ServiceInterface;
 
 namespace TraineeManagementApi.Submissions.Cotroller;
 
-
 [ApiController]
 [Route("api/submissions")]
 [Authorize]

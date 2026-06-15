@@ -40,7 +40,7 @@ public class JwtService : IJwtService
 
         Claim[] claims = new[]
         {
-            new Claim("UserId", user.Id.ToString()),
+            new Claim("Id", user.Id.ToString()),
             new Claim("Username", user.Username),
             new Claim("Role", user.Role.ToString())
         };

@@ -27,27 +27,42 @@ TraineeManagement.Api/
 │   ├── UserController.cs
 │   ├── MentorsController.cs
 │   ├── LearningTasksController.cs
+│   ├── TaskAssignmentsController.cs
+│   ├── SubmissionsController.cs
+│   ├── ReviewsController.cs
 ├── Models/
 │   ├── Trainee.cs
 │   ├── User.cs
 │   ├── Mentor.cs
 │   ├── LearningTask.cs
+│   ├── TaskAssignment.cs
+│   ├── Submission.cs
+│   ├── Review.cs
 ├── DTOs/
-│   ├── TraineeDto
-│   ├── UserDto
-│   ├── MentorDto
-│   ├── LearningTaskDto
+│   ├── TraineeDto.cs
+│   ├── UserDto.cs
+│   ├── MentorDto.cs
+│   ├── LearningTaskDto.cs
+│   ├── TaskAssignmentDto.cs
+│   ├── SubmissionDto.cs
+│   ├── ReviewDto.cs
 ├── Interfaces/
-│   ├── ILearningTaskServices
-│   ├── IMentorServices
-│   ├── ITimeStamp
-│   ├── ITraineeServices
-│   ├── IUserServices
-├── Services/
+│   ├── ILearningTaskServices.cs
+│   ├── IMentorServices.cs
+│   ├── ITimeStamp.cs
 │   ├── ITraineeServices.cs
 │   ├── IUserServices.cs
-│   ├── IMentorServices.cs
-│   ├── ILearningTaskServices.cs
+│   ├── ITaskAssignmentServices.cs
+│   ├── ISubmissionServices.cs
+│   ├── IReviewServices.cs
+├── Services/
+│   ├── TraineeServices.cs
+│   ├── UserServices.cs
+│   ├── MentorServices.cs
+│   ├── LearningTaskServices.cs
+│   ├── TaskAssignmentServices.cs
+│   ├── SubmissionServices.cs
+│   ├── ReviewServices.cs
 ├── Utils/
 │   ├── CustomException.cs
 │   ├── JwtService.cs
@@ -68,12 +83,12 @@ TraineeManagement.Api/
 ### Prerequisites
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
-- [MySQL Server 8.x](https://dev.mysql.com/downloads/mysql/)I
+- [MySQL Server 8.x](https://dev.mysql.com/downloads/mysql/)
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <https://github.com/ViralGujarati4131/TraineeManagement.Api>
+git clone https://github.com/ViralGujarati4131/TraineeManagement.Api
 cd TraineeManagement.Api
 ```
 
@@ -112,7 +127,19 @@ Update `appsettings.json` with your MySQL credentials:
 ### 3. Start Mysql
 
 ```bash
-dotnet service mysql start
+sudo service mysql start
+```
+
+---
+
+## Configure SigningKey
+
+Update `appsettings.json`:
+
+```json
+ "JWT": {
+    "Key": "<Add Your SigningKey>"
+  }
 ```
 
 ---
@@ -226,6 +253,31 @@ https://localhost:<port>/swagger
 | PUT | `/api/learning-tasks/{id}` | Update a learning task |
 | DELETE | `/api/learning-tasks/{id}` | Delete a learning task |
 
+### Task Assignment APIs (Protected)
+ 
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/task-assignments` | Create a new task assignment |
+| GET | `/api/task-assignments` | Get all task assignments |
+| GET | `/api/task-assignments/{id}` | Get task assignment by ID |
+| PUT | `/api/task-assignments/{id}/status` | Update assignment status |
+ 
+### Submission APIs (Protected)
+ 
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/submissions` | Submit work for an assignment |
+| GET | `/api/submissions` | Get all submissions |
+| GET | `/api/submissions/{id}` | Get submission by ID |
+ 
+### Review APIs (Protected)
+ 
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/reviews` | Add a mentor review |
+| GET | `/api/reviews` | Get all reviews |
+| GET | `/api/reviews/{id}` | Get review by ID |
+ 
 ---
 
 ## Sample Request & Response JSON
@@ -325,6 +377,58 @@ Request:
 ```
 ---
 
+### Create Task Assignment
+ 
+**POST** `/api/task-assignments`
+ 
+Request:
+```json
+{
+  "traineeId": 1,
+  "mentorId": 1,
+  "learningTaskId": 1,
+  "assignedDate": "2026-06-11",
+  "dueDate": "2026-07-01",
+  "status": "Assigned",
+  "remarks": "Complete Phase 2 API task"
+}
+```
+ 
+---
+ 
+### Submit Work
+ 
+**POST** `/api/submissions`
+ 
+Request:
+```json
+{
+  "taskAssignmentId": 1,
+  "submissionUrl": "https://github.com/trainee/trainee-management-api",
+  "notes": "Completed all Phase 2 requirements including JWT and MySQL integration.",
+  "status": "Submitted"
+}
+```
+ 
+---
+ 
+### Add Review
+ 
+**POST** `/api/reviews`
+ 
+Request:
+```json
+{
+  "submissionId": 1,
+  "mentorId": 1,
+  "feedback": "Good work. Clean code structure and proper JWT implementation.",
+  "score": 85,
+  "reviewStatus": "Accepted"
+}
+```
+ 
+---
+
 ## CORS Configuration
 
 CORS is configured to allow the React frontend origins:
@@ -340,7 +444,7 @@ CORS is configured to allow the React frontend origins:
 |---|---|
 | Authentication | JWT bearer token validation enabled |
 | Authorization | All APIs except `/api/health` and `/api/auth/login` require a valid token |
-| Password storage | Passwords stored as hash only — plain text never stored or logged |
+| Password storage | Passwords stored as hash only plain text never stored or logged |
 | Excessive data exposure | DTOs used for all responses; `PasswordHash` never returned |
 | Injection prevention | EF Core parameterized queries used; no raw unsafe SQL |
 | Security misconfiguration | CORS restricted to known React dev origins |
@@ -360,9 +464,4 @@ The following events are logged:
 
 ---
 
-## Known Limitations
-
----
-
-## Next Improvement Areas
 

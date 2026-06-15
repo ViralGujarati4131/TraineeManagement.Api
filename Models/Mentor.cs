@@ -29,8 +29,8 @@ public class Mentor : ITimestamp
 
     public DateTime UpdatedDate { get; set; }
 
-    public IEnumerable<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
-    public IEnumerable<Review> Reviews { get; set; } = new List<Review>();
+    public ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
+    public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
 public enum MentorStatus
 {

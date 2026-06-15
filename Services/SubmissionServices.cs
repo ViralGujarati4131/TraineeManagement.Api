@@ -3,6 +3,7 @@ using TraineeManagementApi.Submissions.DTOs;
 using TraineeManagementApi.Submissions.Models;
 using TraineeManagementApi.Submissions.ServiceInterface;
 using TraineeManagementApi.Utils.CustomException;
+using Mapster;
 
 namespace TraineeManagementApi.Submissions.Service;
 
@@ -61,8 +62,8 @@ public class SubmissionService : ISubmissionService
     public async Task<IEnumerable<SubmissionResponseDto>> GetSubmissionsAsync()
     {
         _logger.LogDebug("Fetching all submissions from the database");
-        IEnumerable<Submission> submissions = await _cotext.Submissions.ToListAsync();
-        return submissions.Select(s => MapToResponseDto(s));
+        IEnumerable<SubmissionResponseDto> submissions = await _cotext.Submissions.ProjectToType<SubmissionResponseDto>().ToListAsync();
+        return submissions;
     }
 
     public async Task<SubmissionResponseDto> GetSubmissionByIdAsync(int id)

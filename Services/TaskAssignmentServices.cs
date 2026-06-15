@@ -3,7 +3,7 @@ using TraineeManagementApi.TaskAssignments.ServiceInterface;
 using TraineeManagementApi.TaskAssignments.DTOs;
 using TraineeManagementApi.TaskAssignments.Models;
 using TraineeManagementApi.Utils.CustomException;
-
+using Mapster;
 
 namespace TraineeManagementApi.TaskAssignments.Service;
 
@@ -67,8 +67,8 @@ public class TaskAssignmentService : ITaskAssignmentService
     public async Task<IEnumerable<TaskAssignmentResponseDto>> GetTaskAssignmentsAsync()
     {
         _logger.LogDebug("Fetching all taskAssignments from the database");
-        IEnumerable<TaskAssignment> taskAssignments = await _context.TaskAssignments.ToListAsync();
-        return taskAssignments.Select(t => MapToResponseDto(t));
+        IEnumerable<TaskAssignmentResponseDto> taskAssignments = await _context.TaskAssignments.ProjectToType<TaskAssignmentResponseDto>().ToListAsync();
+        return taskAssignments;
     }
 
     public async Task<TaskAssignmentResponseDto> GetTaskAssignmentByIdAsync(int id)

@@ -32,7 +32,7 @@ public class TaskAssignment
 
     public string Remarks { get; set; } = string.Empty;
 
-    public IEnumerable<Submission> Submissions { get; set; } = new List<Submission>();
+    public ICollection<Submission> Submissions { get; set; } = new List<Submission>();
 }
 
 public enum TaskAssignmentStatus

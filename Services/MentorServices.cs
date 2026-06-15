@@ -3,6 +3,7 @@ using TraineeManagementApi.Mentors.DTOs;
 using TraineeManagementApi.Mentors.Models;
 using TraineeManagementApi.Mentors.ServiceInterface;
 using TraineeManagementApi.Utils.CustomException;
+using Mapster;
 
 namespace TraineeManagementApi.Mentors.Service;
 
@@ -38,8 +39,8 @@ public class MentorService : IMentorServices
     public async Task<IEnumerable<MentorResponseDto>> GetMentorsAsync()
     {
         _logger.LogDebug("Fetching all mentors from the database");
-        IEnumerable<Mentor> mentors = await _context.Mentors.ToListAsync();
-        return mentors.Select(m => MapToResponseDto(m));
+        IEnumerable<MentorResponseDto> mentors = await _context.Mentors.ProjectToType<MentorResponseDto>().ToListAsync();
+        return mentors;
     }
 
     public async Task<MentorResponseDto> GetMentorByIdAsync(int id)

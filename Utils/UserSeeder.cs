@@ -9,13 +9,11 @@ namespace TraineeManagementApi.Utils.UserSeeder;
 
 public class UserSeeder
 {
-    private static ILogger<UserSeeder>? _logger;
-
     public static async Task SeedAsync(IServiceProvider serviceProvider)
     {
         using IServiceScope scope = serviceProvider.CreateScope();
         AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        _logger = scope.ServiceProvider.GetService<ILogger<UserSeeder>>();
+        ILogger<UserSeeder> _logger = scope.ServiceProvider.GetRequiredService<ILogger<UserSeeder>>();
 
         const string DefaultUser = "admin";
         try
@@ -41,7 +39,7 @@ public class UserSeeder
                 _logger?.LogInformation("Admin user {Username} seeded successfully", DefaultUser);
             }
 
-            if (!db.Trainees.Any())
+            if (!await db.Trainees.AnyAsync())
             {
                 db.Trainees.AddRange(
                     new Trainee { FirstName = "Viral", LastName = "Gujarati", Email = "viralgujarati@gmail.com", TechStack = "ReactNative", Status = TraineeStatus.Active },
@@ -51,7 +49,7 @@ public class UserSeeder
                 await db.SaveChangesAsync();
             }
 
-            if (!db.Mentors.Any())
+            if (!await db.Mentors.AnyAsync())
             {
                 db.Mentors.AddRange(
                     new Mentor { FirstName = "Narendra", LastName = "Patel", Email = "nmp@gmail.com", Expertise = "OS, COA, CPP", Status = MentorStatus.Active },
@@ -61,7 +59,7 @@ public class UserSeeder
                 await db.SaveChangesAsync();
             }
 
-            if (!db.LearningTasks.Any())
+            if (!await db.LearningTasks.AnyAsync())
             {
                 db.LearningTasks.AddRange(
                     new LearningTask { Title = "Backend", Description = "APIs, Controller, Sevice, Dto, Middleware", ExpectedTechStack = "ASP .NET Web API", DueDate = new DateOnly(2025, 6, 24), Status = LearningTaskStatus.Draft },
