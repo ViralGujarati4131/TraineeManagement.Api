@@ -92,7 +92,7 @@ public class TaskAssignment : IValidatableObject
         {
             yield return new ValidationResult
             (
-                AppConstants.Errors.TaskAssignments.ModelInvalidDueDate,
+                "DueDate can not be before the assigned date",
                 new[] { nameof(DueDate) }   
             );
         }

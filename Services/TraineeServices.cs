@@ -36,7 +36,7 @@ public class TraineeService : ITraineeService
         {
             _logger.LogWarning("Trainee with ID {TraineeId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.Trainees.NotFound);
+            throw new NotFoundException("Trainee");
         }
         return trainee;
     }
@@ -69,7 +69,7 @@ public class TraineeService : ITraineeService
         {
             _logger.LogWarning("Trainee with ID {TraineeId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.Trainees.NotFound);
+            throw new NotFoundException("Trainee");
         }
         return trainee;
     }

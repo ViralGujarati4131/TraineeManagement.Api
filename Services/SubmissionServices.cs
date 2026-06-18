@@ -39,7 +39,7 @@ public class SubmissionService : ISubmissionService
         {
             _logger.LogWarning("Submission with ID {SubmissionId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.Submissions.NotFound);
+            throw new NotFoundException("Submission");
         }
         return submission;
     }
@@ -102,7 +102,7 @@ public class SubmissionService : ISubmissionService
         {
             _logger.LogWarning("Submission with ID {SubmissionId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.Submissions.NotFound);
+            throw new NotFoundException("Submission");
         }
         return submission;
     }

@@ -34,7 +34,7 @@ public class MentorService : IMentorServices
         {
             _logger.LogWarning("Mentor with ID {MentorId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.Mentors.NotFound);
+            throw new NotFoundException("Mentor");
         }
         return mentor;
     }
@@ -73,7 +73,7 @@ public class MentorService : IMentorServices
         {
             _logger.LogWarning("Mentor with ID {MentorId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.Mentors.NotFound);
+            throw new NotFoundException("Mentor");
         }
         return mentor;
     }

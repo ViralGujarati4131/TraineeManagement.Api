@@ -22,9 +22,9 @@ public class UserController : ControllerBase
     [HttpPost(AppConstants.Routes.Login)]
     public async Task<ActionResult> LoginUser([FromBody] UserLoginDto userLoginDto)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            return ResponseBuilder.CreateResponse(StatusCodes.Status400BadRequest, AppConstants.Errors.ValidationFailed,ModelState);
+            return ResponseBuilder.CreateValidationErrorResponse(ModelState);
         }
         _logger.LogInformation("Login attempt initiated for Username: {Username}", userLoginDto.Username);
 
@@ -32,6 +32,11 @@ public class UserController : ControllerBase
         
         _logger.LogInformation("Authentication successful. Session token issued for Username: {Username}", userLoginDto.Username);
         
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,authenticationResult);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeSuccess,
+            AppConstants.ApiResponse.MsgSuccess,
+            authenticationResult
+        );
     }
 }

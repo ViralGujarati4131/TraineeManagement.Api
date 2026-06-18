@@ -24,15 +24,20 @@ public class TaskAssignmentsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> CreateTaskAssignment([FromBody] TaskAssignmentCreateDto createTaskAssignmentDto)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            return ResponseBuilder.CreateResponse(StatusCodes.Status400BadRequest,AppConstants.Errors.ValidationFailed,ModelState);
+            return ResponseBuilder.CreateValidationErrorResponse(ModelState);
         }
         _logger.LogDebug("Invoking task-assignment service to add a new task-assignment");
 
         TaskAssignmentResponseDto createdTaskAssignment = await _taskAssignmentService.CreateTaskAssignmentAsync(createTaskAssignmentDto);
         
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,createdTaskAssignment);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeCreated,
+            AppConstants.ApiResponse.MsgCreated,
+            createdTaskAssignment
+        );
     }
 
     [HttpGet]
@@ -42,34 +47,49 @@ public class TaskAssignmentsController : ControllerBase
 
         IEnumerable<TaskAssignmentResponseDto> taskAssignments = await _taskAssignmentService.GetTaskAssignmentsAsync();
 
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,taskAssignments);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeSuccess,
+            AppConstants.ApiResponse.MsgSuccess,
+            taskAssignments
+        );
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult> GetTaskAssignmentById(int id)
     {
-        if(!ModelState.IsValid || id < 1)
+        if (!ModelState.IsValid || id < 1)
         {
-            return ResponseBuilder.CreateResponse(StatusCodes.Status400BadRequest,AppConstants.Errors.ValidationFailed,ModelState);
+            return ResponseBuilder.CreateValidationErrorResponse(ModelState);
         }
         _logger.LogDebug("Invoking task-assignment service to retrieve assignments for AssignmentId: {AssignmentId}", id);
 
         TaskAssignmentResponseDto taskAssignment = await _taskAssignmentService.GetTaskAssignmentByIdAsync(id);
 
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,taskAssignment);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeSuccess,
+            AppConstants.ApiResponse.MsgSuccess,
+            taskAssignment
+        );
     }
 
     [HttpPut("{id}/status")]
     public async Task<ActionResult> UpdateTaskAssignmentById(int id, [FromBody] TaskAssignmentUpdateDto updateTaskAssignmentDto)
     {
-        if(!ModelState.IsValid || id < 1)
+        if (!ModelState.IsValid || id < 1)
         {
-            return ResponseBuilder.CreateResponse(StatusCodes.Status400BadRequest,AppConstants.Errors.ValidationFailed,ModelState);
+            return ResponseBuilder.CreateValidationErrorResponse(ModelState);
         }
         _logger.LogDebug("Invoking task-assignment service to modify records for AssignmentId: {AssignmentId}", id);
         
         TaskAssignmentResponseDto updatedTaskAssignment = await _taskAssignmentService.UpdateTaskAssignmentAsync(id, updateTaskAssignmentDto);
         
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,updatedTaskAssignment);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeSuccess,
+            AppConstants.ApiResponse.MsgUpdated,
+            updatedTaskAssignment
+        );
     }
 }

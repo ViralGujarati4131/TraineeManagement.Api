@@ -41,7 +41,7 @@ public class TaskAssignmentService : ITaskAssignmentService
         {
             _logger.LogWarning("TaskAssignment with ID {AssignmentId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.TaskAssignments.NotFound);
+            throw new NotFoundException("TaskAssignment");
         }
         return taskAssignment;
     }
@@ -110,7 +110,7 @@ public class TaskAssignmentService : ITaskAssignmentService
         {
             _logger.LogWarning("TaskAssignment with ID {AssignmentId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.TaskAssignments.NotFound);
+            throw new NotFoundException("TaskAssignment");
         }
         return taskAssignment;
     }

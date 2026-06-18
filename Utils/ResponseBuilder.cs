@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using TraineeManagementApi.Constants;
 
 namespace TraineeManagementApi.ResponsesBuilder;
 
 public static class ResponseBuilder
 {
-    public static ActionResult CreateResponse(int status, string message, ModelStateDictionary modelstate)
+    public static ActionResult CreateValidationErrorResponse(ModelStateDictionary modelstate)
     {
-        // var errors = modelstate
+        // var validationErrors = modelstate
         //     .Where(ms => ms.Value?.Errors.Count > 0)
         //     .Select(ms => new
         //     {
@@ -17,24 +18,31 @@ public static class ResponseBuilder
 
         return new ObjectResult(new
         {
-            Messages = message,
-            // Errors = errors
+            Code = AppConstants.ApiResponse.CodeValidationError,
+            Message = AppConstants.ApiResponse.MsgValidationError,
+            // Errors = validationErrors
         })
         {
-            StatusCode = status
+            StatusCode = StatusCodes.Status400BadRequest
         };
     }
 
-    public static ActionResult CreateResponseSuccess(int status, object? data = null)
+    // Standard Success Envelope (2000, 2010, etc.)
+    public static ActionResult CreateSuccessResponse(int httpStatus, string appCode, string sharedMessage, object? data = null)
     {
-        if (status == StatusCodes.Status204NoContent || data == null)
+        if (httpStatus == StatusCodes.Status204NoContent)
         {
             return new StatusCodeResult(StatusCodes.Status204NoContent);
         }
 
-        return new ObjectResult(data)
+        return new ObjectResult(new
         {
-            StatusCode = status
+            Code = appCode,
+            Message = sharedMessage,
+            Data = data
+        })
+        {
+            StatusCode = httpStatus
         };
     }
 }

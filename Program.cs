@@ -55,35 +55,35 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, serverVersion)
 );
 
-// to take bearer token from user
-builder.Services.AddOpenApi("v1", options =>
-{
-    options.AddDocumentTransformer((document, context, cancellationToken) =>
-    {
-        OpenApiSecurityScheme scheme = new OpenApiSecurityScheme
-        {
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Description = "Enter your JWT token directly"
-        };
-        document.Components ??= new OpenApiComponents();
-        document.Components.SecuritySchemes.Add("Bearer", scheme);
-        document.SecurityRequirements.Add(new OpenApiSecurityRequirement
-        {
-            [new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            }] = Array.Empty<string>()
-        });
-        return Task.CompletedTask;
-    });
-});
+// // to take bearer token from user
+// builder.Services.AddOpenApi("v1", options =>
+// {
+//     options.AddDocumentTransformer((document, context, cancellationToken) =>
+//     {
+//         OpenApiSecurityScheme scheme = new OpenApiSecurityScheme
+//         {
+//             Type = SecuritySchemeType.Http,
+//             Scheme = "bearer",
+//             BearerFormat = "JWT",
+//             In = ParameterLocation.Header,
+//             Description = "Enter your JWT token directly"
+//         };
+//         document.Components ??= new OpenApiComponents();
+//         document.Components.SecuritySchemes.Add("Bearer", scheme);
+//         document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+//         {
+//             [new OpenApiSecurityScheme
+//             {
+//                 Reference = new OpenApiReference
+//                 {
+//                     Type = ReferenceType.SecurityScheme,
+//                     Id = "Bearer"
+//                 }
+//             }] = Array.Empty<string>()
+//         });
+//         return Task.CompletedTask;
+//     });
+// });
 
 // to validate the bearer token
 IConfigurationSection jwtSettings = builder.Configuration.GetSection("JWT");
@@ -140,21 +140,21 @@ builder.Services.AddCors(options =>
                       });
 });
 
-builder.Services.AddOpenApi();
+// builder.Services.AddOpenApi();
 
 WebApplication app = builder.Build();
 
 // seed the user
 await UserSeeder.SeedAsync(app.Services);
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwaggerUi(options =>
-    {
-        options.DocumentPath = "/openapi/v1.json";
-    });
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     app.MapOpenApi();
+//     app.UseSwaggerUi(options =>
+//     {
+//         options.DocumentPath = "/openapi/v1.json";
+//     });
+// }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();

@@ -39,7 +39,7 @@ public class LearningTaskService : ILearningTaskService
         {
             _logger.LogWarning("LearningTask with ID {TaskId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.LearningTasks.NotFound);
+            throw new NotFoundException("LearningTask");
         }
         return learningTask;
     }
@@ -84,7 +84,7 @@ public class LearningTaskService : ILearningTaskService
         {
             _logger.LogWarning("LearningTask with ID {TaskId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.LearningTasks.NotFound);
+            throw new NotFoundException("LearningTask");
         }
         return learningTask;
     }

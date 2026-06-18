@@ -55,7 +55,7 @@ public class UserService : IUserService
         {
             _logger.LogWarning("User with Username {Username} was not found in the database", username);
 
-            throw new NotFoundException(AppConstants.Errors.Users.NotFound);
+            throw new NotFoundException("User");
         }
         return user;
     }

@@ -40,7 +40,7 @@ public class ReviewService : IReviewService
         {
             _logger.LogWarning("Review with ID {ReviewId} was not found", id);
 
-            throw new NotFoundException(AppConstants.Errors.Reviews.NotFound);
+            throw new NotFoundException("Review");
         }
         return review;
     }
@@ -106,7 +106,7 @@ public class ReviewService : IReviewService
         {
             _logger.LogWarning("Review with ID {ReviewId} was not found", id);
             
-            throw new NotFoundException(AppConstants.Errors.Reviews.NotFound);
+            throw new NotFoundException("Review");
         }                            
         return review;
     }

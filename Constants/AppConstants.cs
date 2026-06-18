@@ -2,56 +2,39 @@ namespace TraineeManagementApi.Constants
 {
     public static class AppConstants
     {
+        public static class ApiResponse
+        {
+            // Global Application Codes
+            public const string CodeSuccess = "2000";
+            public const string CodeCreated = "2010";
+            public const string CodeBadRequest = "4000";
+            public const string CodeValidationError = "4010";
+            public const string CodeUnauthorized = "4030";
+            public const string CodeNotFound = "4040";
+            public const string CodeServerError = "5000";
+
+            // Universal Shared Messages
+            public const string MsgSuccess  = "Data retrieved successfully";
+            public const string MsgCreated  = "Data created successfully";
+            public const string MsgUpdated  = "Data updated successfully";
+            public const string MsgDeleted  = "Data deleted successfully";
+            public const string MsgNotFound = "Requested data was not found";
+            public const string MsgValidationError = "Validation failed for the request data";
+            public const string MsgBadRequest = "Invalid request arguments or operation rules";
+        }
+
         public static class Errors
         {
-            public const string ValidationFailed = "Validation failed";
-            public const string AllFieldsRequired = "All fields are require";
-            
-            // Middleware Errors
             public const string JwtAuthError = "An unexpected error occurred while processing authentication please retry";
             public const string SqlReferenceConflict = "Some of the provided References does conflits ";
             public const string SqlDeleteReferenceError = "Delete Operation Could not be completed because of existing reference";
             public const string UsernameExists = "Username is already exists";
             public const string GeneralInternalServerError = "Something Went Wrong, Please Try Again";
-
-            // Jwtservice 
             public const string JwtSecretMissing = "JWT Secret Key not configured.";
-
-            public static class LearningTasks
-            {
-                public const string NotFound = "LearningTask was not found";
-            }
-
-            public static class Mentors
-            {
-                public const string NotFound = "Mentor was not found";
-            }
-
-            public static class Reviews
-            {
-                public const string NotFound = "Review was not found";
-            }
-
-            public static class Submissions
-            {
-                public const string NotFound = "Submission was not found";
-            }
-
-            public static class TaskAssignments
-            {
-                public const string NotFound = "TaskAssignment was not found";
-                public const string ModelInvalidDueDate = "DueDate cannot be earlier than AssignedDate.";
-            }
 
             public static class Users
             {
-                public const string NotFound = "User was not found";
                 public const string InvalidCredentials = "Invalid credential provided";
-            }
-
-            public static class Trainees
-            {
-                public const string NotFound = "Trainee was not found";
             }
         }
 
@@ -64,8 +47,6 @@ namespace TraineeManagementApi.Constants
             public const string Trainees = "api/trainee";
             public const string TaskAssignments = "api/task-assignments";
             public const string Auth = "api/auth";
-            
-            // Sub-routes
             public const string PaginationSearch = "paginationSearch";
             public const string Login = "login";
         }
@@ -82,16 +63,12 @@ namespace TraineeManagementApi.Constants
 
         public static class Security
         {
-            // Claims
             public const string ClaimId = "Id";
             public const string ClaimUsername = "Username";
             public const string ClaimRole = "Role";
-
-            // Seed user config data
             public const string DefaultRole = "Admin";
             public const int DefaultExpiryMinutes = 60;
 
-            // seed user
             public static class Seeding
             {
                 public const string DefaultAdminUsername = "admin";

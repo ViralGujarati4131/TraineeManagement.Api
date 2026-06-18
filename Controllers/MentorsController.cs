@@ -14,6 +14,7 @@ public class MentorController : ControllerBase
 {
     private readonly IMentorServices _mentorService;
     private readonly ILogger<MentorController> _logger;
+
     public MentorController(IMentorServices mentorService, ILogger<MentorController> logger)
     {
         _mentorService = mentorService;
@@ -27,62 +28,86 @@ public class MentorController : ControllerBase
 
         IEnumerable<MentorResponseDto> mentors = await _mentorService.GetMentorsAsync();
 
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,mentors);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeSuccess,
+            AppConstants.ApiResponse.MsgSuccess,
+            mentors
+        );
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult> GetMentorById(int id)
     {
-        if(!ModelState.IsValid || id < 1)
+        if (!ModelState.IsValid || id < 1)
         {
-            return ResponseBuilder.CreateResponse(StatusCodes.Status400BadRequest,AppConstants.Errors.ValidationFailed,ModelState);
+            return ResponseBuilder.CreateValidationErrorResponse(ModelState);
         }
         _logger.LogDebug("Invoking mentor service to retrieve profile for MentorId: {MentorId}", id);
 
         MentorResponseDto mentor = await _mentorService.GetMentorByIdAsync(id);
 
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,mentor);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeSuccess,
+            AppConstants.ApiResponse.MsgSuccess,
+            mentor
+        );
     }
 
     [HttpPost]
     public async Task<ActionResult> CreateMentor([FromBody] MentorCreateDto createMentorDto)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            return ResponseBuilder.CreateResponse(StatusCodes.Status400BadRequest,AppConstants.Errors.ValidationFailed,ModelState);
+            return ResponseBuilder.CreateValidationErrorResponse(ModelState);
         }
         _logger.LogDebug("Invoking mentor service to establish a new mentor registration");
 
         MentorResponseDto createdMentor = await _mentorService.CreateMentorAsync(createMentorDto);
 
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,createdMentor);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeCreated,
+            AppConstants.ApiResponse.MsgCreated,
+            createdMentor
+        );
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteMentorById(int id)
     {
-        if(!ModelState.IsValid || id < 1)
+        if (!ModelState.IsValid || id < 1)
         {
-            return ResponseBuilder.CreateResponse(StatusCodes.Status400BadRequest,AppConstants.Errors.ValidationFailed,ModelState);
+            return ResponseBuilder.CreateValidationErrorResponse(ModelState);
         }
         _logger.LogDebug("Invoking mentor service to delete record for MentorId: {MentorId}", id);
 
         await _mentorService.DeleteMentorByIdAsync(id);
 
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status204NoContent);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status204NoContent,
+            AppConstants.ApiResponse.CodeSuccess,
+            AppConstants.ApiResponse.MsgDeleted
+        );
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateMentorById(int id, [FromBody] MentorUpdateDto updateMentorDto)
     {
-        if(!ModelState.IsValid || id < 1)
+        if (!ModelState.IsValid || id < 1)
         {
-            return ResponseBuilder.CreateResponse(StatusCodes.Status400BadRequest,AppConstants.Errors.ValidationFailed,ModelState);
+            return ResponseBuilder.CreateValidationErrorResponse(ModelState);
         }
         _logger.LogDebug("Invoking mentor service to modify records for MentorId: {MentorId}", id);
 
         MentorResponseDto updatedMentor = await _mentorService.UpdateMentorByIdAsync(id, updateMentorDto);
         
-        return ResponseBuilder.CreateResponseSuccess(StatusCodes.Status200OK,updatedMentor);
+        return ResponseBuilder.CreateSuccessResponse(
+            StatusCodes.Status200OK,
+            AppConstants.ApiResponse.CodeSuccess,
+            AppConstants.ApiResponse.MsgUpdated,
+            updatedMentor
+        );
     }
 }
