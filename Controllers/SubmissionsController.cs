@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.Submissions.DTOs;
 using TraineeManagementApi.Submissions.ServiceInterface;
-using TraineeManagementApi.ResponsesBuilder;
+using TraineeManagementApi.Utils.ResponsesBuilder;
 using TraineeManagementApi.Constants;
 
 namespace TraineeManagementApi.Submissions.Cotroller;

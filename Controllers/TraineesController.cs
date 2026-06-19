@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.Utils.CustomException;
 using TraineeManagementApi.Trainees.DTOs;
 using TraineeManagementApi.Trainees.ServiceInterface;
-using TraineeManagementApi.ResponsesBuilder;
+using TraineeManagementApi.Utils.ResponsesBuilder;
 using TraineeManagementApi.Constants;
 
 namespace TraineeManagementApi.Trainees.Controller;

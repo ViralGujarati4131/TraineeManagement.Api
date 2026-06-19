@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.TaskAssignments.DTOs;
 using TraineeManagementApi.TaskAssignments.ServiceInterface;
-using TraineeManagementApi.ResponsesBuilder;
+using TraineeManagementApi.Utils.ResponsesBuilder;
 using TraineeManagementApi.Constants;
 
 namespace TraineeManagementApi.TaskAssignments.Controller;

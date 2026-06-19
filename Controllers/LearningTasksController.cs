@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.LearningTasks.DTOs;
 using TraineeManagementApi.LearningTasks.ServiceInterface;
-using TraineeManagementApi.ResponsesBuilder;
+using TraineeManagementApi.Utils.ResponsesBuilder;
 using TraineeManagementApi.Constants;
 
 namespace TraineeManagementApi.LearningTasks.Controller;

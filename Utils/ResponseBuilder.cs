@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using TraineeManagementApi.Constants;
 
-namespace TraineeManagementApi.ResponsesBuilder;
+namespace TraineeManagementApi.Utils.ResponsesBuilder;
 
 public static class ResponseBuilder
 {

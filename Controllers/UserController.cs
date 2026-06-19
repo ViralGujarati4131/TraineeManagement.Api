@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.Users.DTOs;
 using TraineeManagementApi.Users.ServiceInterface;
-using TraineeManagementApi.ResponsesBuilder;
+using TraineeManagementApi.Utils.ResponsesBuilder;
 using TraineeManagementApi.Constants;
 
 namespace TraineeManagementApi.Users.Controller;

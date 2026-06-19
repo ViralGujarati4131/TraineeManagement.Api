@@ -1,44 +1,45 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.Mentors.Models;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Mentors.DTOs;
 
 public record MentorCreateDto
 (
-    [Required]
+    [RequiredField]
     string FirstName,
 
-    [Required]
+    [RequiredField]
     string LastName,
 
-    [Required]
+    [RequiredField]
     [EmailAddress]
     string Email,
 
-    [Required]
+    [RequiredField]
     string Expertise,
 
     [EnumDataType(typeof(MentorStatus))]
-    [Required]
+    [RequiredField]
     MentorStatus Status
 );
 
 public record MentorUpdateDto
 (
-    [Required]
+    [RequiredField]
     string FirstName,
 
-    [Required]
+    [RequiredField]
     string LastName,
 
     [EmailAddress]
     string Email,
 
-    [Required]
+    [RequiredField]
     string Expertise,
 
     [EnumDataType(typeof(MentorStatus))]
-    [Required]
+    [RequiredField]
     MentorStatus? Status
 );
 

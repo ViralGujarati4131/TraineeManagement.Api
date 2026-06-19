@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.TaskAssignments.Models;
 using TraineeManagementApi.Reviews.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Submissions.Models;
 
@@ -26,21 +27,21 @@ public class Submission
         set; 
     }
 
-    [Required]
+    [RequiredField]
     public string SubmissionUrl 
     { 
         get; 
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public string Notes 
     { 
         get; 
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public DateOnly SubmittedDate 
     { 
         get; 
@@ -48,7 +49,7 @@ public class Submission
     }
 
     [EnumDataType(typeof(SubmissionStatus))]
-    [Required]
+    [RequiredField]
     public SubmissionStatus? Status 
     { 
         get; 

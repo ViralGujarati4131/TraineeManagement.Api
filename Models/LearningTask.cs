@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using TraineeManagementApi.TaskAssignments.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.LearningTasks.Models;
 
@@ -16,28 +17,28 @@ public class LearningTask : ITimestamp
         set; 
     }
 
-    [Required]
+    [RequiredField]
     public string Title 
     { 
         get; 
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public string Description 
     { 
         get; 
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public string ExpectedTechStack 
     { 
         get; 
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public DateOnly DueDate 
     { 
         get; 
@@ -45,7 +46,7 @@ public class LearningTask : ITimestamp
     }
 
     [EnumDataType(typeof(LearningTaskStatus))]
-    [Required]
+    [RequiredField]
     public LearningTaskStatus? Status 
     { 
         get; 

@@ -1,43 +1,44 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.LearningTasks.Models;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.LearningTasks.DTOs;
 
 public record LearningTaskCreateDto
 (
-    [Required]
+    [RequiredField]
     string Title,
 
-    [Required]
+    [RequiredField]
     string Description,
 
-    [Required]
+    [RequiredField]
     string ExpectedTechStack,
 
-    [Required]
+    [RequiredField]
     DateOnly DueDate,
 
     [EnumDataType(typeof(LearningTaskStatus))]
-    [Required]
+    [RequiredField]
     LearningTaskStatus? Status
 );
 
 public record LearningTaskUpdateDto
 (
-    [Required]
+    [RequiredField]
     string Title,
 
-    [Required]
+    [RequiredField]
     string Description,
 
-    [Required]
+    [RequiredField]
     string ExpectedTechStack,
 
-    [Required]
+    [RequiredField]
     DateOnly DueDate,
 
     [EnumDataType(typeof(LearningTaskStatus))]
-    [Required]
+    [RequiredField]
     LearningTaskStatus Status
 );
 

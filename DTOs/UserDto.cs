@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.Users.Models;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Users.DTOs;
 
@@ -23,9 +24,9 @@ public record LoginTokenResponseDto
 
 public record UserLoginDto
 (
-    [Required]
+    [RequiredField]
     string Username,
 
-    [Required]
+    [RequiredField]
     string Password
 );

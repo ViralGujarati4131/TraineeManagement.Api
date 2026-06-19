@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.TaskAssignments.Models;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.TaskAssignments.DTOs;
 
@@ -11,14 +12,15 @@ public record TaskAssignmentCreateDto
 
     int LearningTaskId,
 
-    [Required]
+    [RequiredField]
     DateOnly AssignedDate,
 
-    [Required]
+    [RequiredField]
+    [ValidDateRange("AssignedDate")]
     DateOnly DueDate,
 
     [EnumDataType(typeof(TaskAssignmentStatus))]
-    [Required]
+    [RequiredField]
     TaskAssignmentStatus? Status,
 
     string Remarks
@@ -46,6 +48,6 @@ public record TaskAssignmentResponseDto
 public record TaskAssignmentUpdateDto
 (
     [EnumDataType(typeof(TaskAssignmentStatus))]
-    [Required]
+    [RequiredField]
     TaskAssignmentStatus? Status
 );

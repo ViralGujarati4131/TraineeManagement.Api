@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TraineeManagementApi.Models.TimestampInterface;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Users.Models;
 
@@ -14,14 +15,14 @@ public class User : ITimestamp
         set; 
     }
 
-    [Required]
+    [RequiredField]
     public string Username 
     { 
         get; 
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public string PasswordHash 
     { 
         get; 
@@ -29,7 +30,7 @@ public class User : ITimestamp
     } = string.Empty;
 
     [EnumDataType(typeof(UserRole))]
-    [Required]
+    [RequiredField]
     public UserRole? Role 
     { 
         get; 

@@ -1,0 +1,90 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace TraineeManagementApi.Utils.CustomValidation;
+
+public class RequiredField : RequiredAttribute
+{
+    public RequiredField()
+    {
+        ErrorMessage = "This field cannot be left blank.";
+    }
+}
+
+public class FeildMaxLength : MaxLengthAttribute
+{
+    public FeildMaxLength(int length) : base(length)
+    {
+        ErrorMessage = $"Value cannot exceed {length} characters.";
+    }
+}
+
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
+public class ValidDateRangeAttribute : ValidationAttribute
+{
+    private readonly string _comparisonProperty;
+
+    public ValidDateRangeAttribute(string comparisonProperty)
+    {
+        _comparisonProperty = comparisonProperty;
+        ErrorMessage = "DueDate can not be before the assigned date";
+    }
+
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        if (value == null) return ValidationResult.Success;
+
+        var currentValue = (DateOnly)value;
+
+        var property = validationContext.ObjectType.GetProperty(_comparisonProperty);
+        if (property == null)
+        {
+            return new ValidationResult($"Unknown property: {_comparisonProperty}");
+        }
+
+        var comparisonValue = property.GetValue(validationContext.ObjectInstance);
+
+        if (comparisonValue is DateOnly targetDate && currentValue < targetDate)
+        {
+            return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName! });
+        }
+
+        return ValidationResult.Success;
+    }
+}
+
+
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
+public class ValidEnumAttribute : ValidationAttribute
+{
+    private readonly Type _enumType;
+
+    public ValidEnumAttribute(Type enumType)
+    {
+        // Safety check to make sure developers pass an actual Enum type
+        if (!enumType.IsEnum)
+        {
+            throw new ArgumentException("The type provided must be an Enum.");
+        }
+        _enumType = enumType;
+        ErrorMessage = $"The provided value is not a valid {_enumType.Name} status.";
+    }
+
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        // Let [RequiredField] handle null or empty checks
+        if (value == null) return ValidationResult.Success;
+
+        // Verify if the value is defined inside the target Enum type
+        bool isValidEnum = Enum.IsDefined(_enumType, value);
+
+        if (!isValidEnum)
+        {
+            return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName! });
+        }
+
+        return ValidationResult.Success;
+    }
+}
+
+
+// [ValidEnum(typeof(TaskAssignmentStatus))]

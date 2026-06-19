@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.Submissions.Models;
 using TraineeManagementApi.Mentors.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Reviews.Models;
 
@@ -37,7 +38,7 @@ public class Review
         set; 
     }
 
-    [Required]
+    [RequiredField]
     public string Feedback 
     { 
         get; 
@@ -51,14 +52,14 @@ public class Review
     }
 
     [EnumDataType(typeof(ReviewStatus))]
-    [Required]
+    [RequiredField]
     public ReviewStatus? ReviewStatus 
     { 
         get; 
         set; 
     }
 
-    [Required]
+    [RequiredField]
     public DateOnly ReviewedDate 
     { 
         get; 

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.Submissions.Models;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Submissions.DTOs;
 
@@ -7,17 +8,17 @@ public record SubmissionCreateDto
 (
     int TaskAssignmentId,
 
-    [Required]
+    [RequiredField]
     string SubmissionUrl,
 
-    [Required]
+    [RequiredField]
     string Notes,
 
-    [Required]
+    [RequiredField]
     DateOnly SubmittedDate,
 
     [EnumDataType(typeof(SubmissionStatus))]
-    [Required]
+    [RequiredField]
     SubmissionStatus? Status
 );
 

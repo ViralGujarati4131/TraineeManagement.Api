@@ -5,10 +5,11 @@ using TraineeManagementApi.LearningTasks.Models;
 using TraineeManagementApi.Submissions.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using TraineeManagementApi.Constants;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.TaskAssignments.Models;
 
-public class TaskAssignment : IValidatableObject
+public class TaskAssignment
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -51,14 +52,15 @@ public class TaskAssignment : IValidatableObject
         set; 
     }
 
-    [Required]
+    [RequiredField]
     public DateOnly AssignedDate 
     { 
         get; 
         set; 
     }
 
-    [Required]
+    [RequiredField]
+    [ValidDateRange("AssignedDate")]
     public DateOnly DueDate 
     { 
         get; 
@@ -66,7 +68,7 @@ public class TaskAssignment : IValidatableObject
     }
 
     [EnumDataType(typeof(TaskAssignmentStatus))]
-    [Required]
+    [RequiredField]
     public TaskAssignmentStatus? Status 
     { 
         get; 
@@ -84,19 +86,6 @@ public class TaskAssignment : IValidatableObject
         get; 
         set; 
     } = new List<Submission>();
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        System.Console.WriteLine("HIiii");
-        if (DueDate < AssignedDate)
-        {
-            yield return new ValidationResult
-            (
-                "DueDate can not be before the assigned date",
-                new[] { nameof(DueDate) }   
-            );
-        }
-    }
 }
 
 public enum TaskAssignmentStatus

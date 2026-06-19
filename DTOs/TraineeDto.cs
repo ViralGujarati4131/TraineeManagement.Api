@@ -1,26 +1,27 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.Trainees.Models;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Trainees.DTOs;
 
 public record TraineeUpdateDto
 (
-    [Required]
-    [MaxLength(50)]
+    [RequiredField]
+    [FeildMaxLength(50)]
     string FirstName,
 
-    [Required]
-    [MaxLength(50)]
+    [RequiredField]
+    [FeildMaxLength(50)]
     string LastName,
 
     [EmailAddress]
     string Email,
 
-    [Required]
+    [RequiredField]
     string TechStack,
 
     [EnumDataType(typeof(TraineeStatus))]
-    [Required]
+    [RequiredField]
     TraineeStatus? Status
 );
 
@@ -35,22 +36,22 @@ public record TraineeResponseDto
 
 public record TraineeCreateDto
 (
-    [Required]
-    [MaxLength(50)]
+    [RequiredField]
+    [FeildMaxLength(50)]
     string FirstName,
 
-    [Required]
-    [MaxLength(50)]
+    [RequiredField]
+    [FeildMaxLength(50)]
     string LastName,
 
     [EmailAddress]
     string Email,
 
-    [Required]
+    [RequiredField]
     string TechStack,
 
     [EnumDataType(typeof(TraineeStatus))]
-    [Required]
+    [RequiredField]
     TraineeStatus? Status
 );
 

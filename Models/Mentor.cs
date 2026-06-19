@@ -3,6 +3,7 @@ using TraineeManagementApi.Models.TimestampInterface;
 using TraineeManagementApi.TaskAssignments.Models;
 using TraineeManagementApi.Reviews.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Mentors.Models;
 
@@ -16,14 +17,14 @@ public class Mentor : ITimestamp
         set; 
     }
 
-    [Required]
+    [RequiredField]
     public string FirstName 
     { 
         get; 
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public string LastName 
     { 
         get; 
@@ -37,7 +38,7 @@ public class Mentor : ITimestamp
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public string Expertise 
     { 
         get; 
@@ -45,7 +46,7 @@ public class Mentor : ITimestamp
     } = string.Empty;
 
     [EnumDataType(typeof(MentorStatus))]
-    [Required]
+    [RequiredField]
     public MentorStatus? Status 
     { 
         get; 

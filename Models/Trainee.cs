@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TraineeManagementApi.Models.TimestampInterface;
 using TraineeManagementApi.TaskAssignments.Models;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Trainees.Models;
 
@@ -14,16 +15,16 @@ public class Trainee : ITimestamp
         get; set; 
     }
 
-    [Required]
-    [MaxLength(50)]
+    [RequiredField]
+    [FeildMaxLength(50)]
     public string FirstName 
     { 
         get; 
         set; 
     } = string.Empty;
 
-    [Required]
-    [MaxLength(50)]
+    [RequiredField]
+    [FeildMaxLength(50)]
     public string LastName 
     { 
         get; 
@@ -37,7 +38,7 @@ public class Trainee : ITimestamp
         set; 
     } = string.Empty;
 
-    [Required]
+    [RequiredField]
     public string TechStack 
     { 
         get; 
@@ -45,7 +46,7 @@ public class Trainee : ITimestamp
     } = string.Empty;
 
     [EnumDataType(typeof(TraineeStatus))]
-    [Required]
+    [RequiredField]
     public TraineeStatus? Status 
     { 
         get; 

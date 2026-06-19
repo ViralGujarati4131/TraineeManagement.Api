@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.Reviews.Models;
+using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Reviews.DTOs;
 
@@ -9,16 +10,16 @@ public record ReviewCreateDto
     
     int MentorId,
     
-    [Required]
+    [RequiredField]
     string Feedback,
     
     int score,
     
     [EnumDataType(typeof(ReviewStatus))]
-    [Required]
+    [RequiredField]
     ReviewStatus? ReviewStatus,
     
-    [Required]
+    [RequiredField]
     DateOnly ReviewedDate
 );
 
