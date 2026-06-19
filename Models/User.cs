@@ -5,7 +5,7 @@ using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Users.Models;
 
-public class User : ITimestamp
+public class User : ICreateTimestamp,IUpdateTimestamp
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -29,7 +29,7 @@ public class User : ITimestamp
         set; 
     } = string.Empty;
 
-    [EnumDataType(typeof(UserRole))]
+    [ValidEnum(typeof(UserRole))]
     [RequiredField]
     public UserRole? Role 
     { 

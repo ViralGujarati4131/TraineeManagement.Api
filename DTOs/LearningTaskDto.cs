@@ -18,7 +18,7 @@ public record LearningTaskCreateDto
     [RequiredField]
     DateOnly DueDate,
 
-    [EnumDataType(typeof(LearningTaskStatus))]
+    [ValidEnum(typeof(LearningTaskStatus))]
     [RequiredField]
     LearningTaskStatus? Status
 );
@@ -37,7 +37,7 @@ public record LearningTaskUpdateDto
     [RequiredField]
     DateOnly DueDate,
 
-    [EnumDataType(typeof(LearningTaskStatus))]
+    [ValidEnum(typeof(LearningTaskStatus))]
     [RequiredField]
     LearningTaskStatus Status
 );

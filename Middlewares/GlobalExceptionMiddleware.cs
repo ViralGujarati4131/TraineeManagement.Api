@@ -36,6 +36,11 @@ public class GlobalExceptionMiddleware
             _logger.LogWarning("Bad Request Exception Intercepted: {Message}", ex.Message);
             await WriteResponse(context, StatusCodes.Status400BadRequest, AppConstants.ApiResponse.CodeBadRequest, AppConstants.ApiResponse.MsgBadRequest);
         }
+        catch (FileNotFound ex)
+        {
+            _logger.LogWarning("File Not Found Exception Intercepted: {Message}", ex.Message);
+            await WriteResponse(context, StatusCodes.Status400BadRequest, AppConstants.ApiResponse.CodeBadRequest, AppConstants.ApiResponse.MsgBadRequest);
+        }
         catch (JwtOperationException ex)
         {
             _logger.LogError(ex, "Invalid operation: {Message}", ex.Message);

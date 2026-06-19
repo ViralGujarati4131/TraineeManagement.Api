@@ -4,7 +4,6 @@ using TraineeManagementApi.Mentors.Models;
 using TraineeManagementApi.LearningTasks.Models;
 using TraineeManagementApi.Submissions.Models;
 using System.ComponentModel.DataAnnotations.Schema;
-using TraineeManagementApi.Constants;
 using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.TaskAssignments.Models;
@@ -67,7 +66,7 @@ public class TaskAssignment
         set; 
     }
 
-    [EnumDataType(typeof(TaskAssignmentStatus))]
+   [ValidEnum(typeof(TaskAssignmentStatus))]
     [RequiredField]
     public TaskAssignmentStatus? Status 
     { 

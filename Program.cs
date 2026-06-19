@@ -19,8 +19,10 @@ using TraineeManagementApi.Submissions.ServiceInterface;
 using TraineeManagementApi.Submissions.Service;
 using TraineeManagementApi.Reviews.ServiceInterface;
 using TraineeManagementApi.Reviews.Service;
-using Microsoft.OpenApi.Models;
+// using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using TraineeManagementApi.FileStorage.ServiceInterface;
+using TraineeManagementApi.FileStorage.Service;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -118,6 +120,7 @@ builder.Services.AddScoped<ILearningTaskService, LearningTaskService>();
 builder.Services.AddScoped<ITaskAssignmentService, TaskAssignmentService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IFileStorageService,FileStorageService>();
 
 // react origin
 string[] allowedOrigin = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();

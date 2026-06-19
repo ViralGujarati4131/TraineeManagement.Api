@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TraineeManagement.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class Latest : Migration
+    public partial class SubmissionFileForeignKey : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -210,6 +210,38 @@ namespace TraineeManagement.Api.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "SubmissionFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    SubmissionId = table.Column<int>(type: "int", nullable: false),
+                    OriginalFileName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StorageFileName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ContentType = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Size = table.Column<long>(type: "bigint", nullable: false),
+                    Checksum = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UploadedByUserId = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubmissionFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubmissionFiles_Submissions_SubmissionId",
+                        column: x => x.SubmissionId,
+                        principalTable: "Submissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_MentorId",
                 table: "Reviews",
@@ -218,6 +250,11 @@ namespace TraineeManagement.Api.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_SubmissionId",
                 table: "Reviews",
+                column: "SubmissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubmissionFiles_SubmissionId",
+                table: "SubmissionFiles",
                 column: "SubmissionId");
 
             migrationBuilder.CreateIndex(
@@ -252,6 +289,9 @@ namespace TraineeManagement.Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Reviews");
+
+            migrationBuilder.DropTable(
+                name: "SubmissionFiles");
 
             migrationBuilder.DropTable(
                 name: "Users");

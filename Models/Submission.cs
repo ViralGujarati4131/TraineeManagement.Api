@@ -3,6 +3,7 @@ using TraineeManagementApi.TaskAssignments.Models;
 using TraineeManagementApi.Reviews.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using TraineeManagementApi.Utils.CustomValidation;
+using TraineeManagementApi.SubmissionFiles.Models;
 
 namespace TraineeManagementApi.Submissions.Models;
 
@@ -48,7 +49,7 @@ public class Submission
         set; 
     }
 
-    [EnumDataType(typeof(SubmissionStatus))]
+    [ValidEnum(typeof(SubmissionStatus))]
     [RequiredField]
     public SubmissionStatus? Status 
     { 
@@ -61,6 +62,12 @@ public class Submission
         get; 
         set; 
     } = new List<Review>();
+
+    public ICollection<SubmissionFile> SubmissionFiles 
+    { 
+        get; 
+        set; 
+    } = new List<SubmissionFile>();
 }
 
 public enum SubmissionStatus

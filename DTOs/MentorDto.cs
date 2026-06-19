@@ -19,7 +19,7 @@ public record MentorCreateDto
     [RequiredField]
     string Expertise,
 
-    [EnumDataType(typeof(MentorStatus))]
+    [ValidEnum(typeof(MentorStatus))]
     [RequiredField]
     MentorStatus Status
 );
@@ -38,7 +38,7 @@ public record MentorUpdateDto
     [RequiredField]
     string Expertise,
 
-    [EnumDataType(typeof(MentorStatus))]
+    [ValidEnum(typeof(MentorStatus))]
     [RequiredField]
     MentorStatus? Status
 );

@@ -51,7 +51,7 @@ public class Review
         set; 
     }
 
-    [EnumDataType(typeof(ReviewStatus))]
+    [ValidEnum(typeof(ReviewStatus))]
     [RequiredField]
     public ReviewStatus? ReviewStatus 
     { 

@@ -20,7 +20,7 @@ public record TraineeUpdateDto
     [RequiredField]
     string TechStack,
 
-    [EnumDataType(typeof(TraineeStatus))]
+    [ValidEnum(typeof(TraineeStatus))]
     [RequiredField]
     TraineeStatus? Status
 );
@@ -50,7 +50,7 @@ public record TraineeCreateDto
     [RequiredField]
     string TechStack,
 
-    [EnumDataType(typeof(TraineeStatus))]
+    [ValidEnum(typeof(TraineeStatus))]
     [RequiredField]
     TraineeStatus? Status
 );

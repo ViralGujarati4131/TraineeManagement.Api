@@ -7,6 +7,7 @@ using TraineeManagementApi.LearningTasks.Models;
 using TraineeManagementApi.TaskAssignments.Models;
 using TraineeManagementApi.Submissions.Models;
 using TraineeManagementApi.Reviews.Models;
+using TraineeManagementApi.SubmissionFiles.Models;
 
 public class AppDbContext : DbContext
 {
@@ -54,6 +55,12 @@ public class AppDbContext : DbContext
         set; 
     }
 
+    public DbSet<SubmissionFile> SubmissionFiles 
+    { 
+        get; 
+        set; 
+    }
+
     public override int SaveChanges()
     {
         ApplyTimestamps();
@@ -69,15 +76,20 @@ public class AppDbContext : DbContext
     private void ApplyTimestamps()
     {
         var entries = ChangeTracker
-            .Entries<ITimestamp>()
-            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+            .Entries<ICreateTimestamp>()
+            .Where(e => e.State == EntityState.Added);
 
         foreach (var entry in entries)
         {
-            if (entry.State == EntityState.Added)
-            {
-                entry.Entity.CreatedDate = DateTime.UtcNow;
-            }
+            entry.Entity.CreatedDate = DateTime.UtcNow;
+        }
+
+        var entries2 = ChangeTracker
+            .Entries<IUpdateTimestamp>()
+            .Where(e => e.State == EntityState.Modified);
+
+        foreach (var entry in entries2)
+        {
             entry.Entity.UpdatedDate = DateTime.UtcNow;
         }
     }
@@ -153,6 +165,14 @@ public class AppDbContext : DbContext
 
             entity.Property(r => r.ReviewStatus)
                 .HasConversion<string>();
+        });
+
+        modelBuilder.Entity<SubmissionFile>(entity =>
+        {
+            entity.HasOne(s => s.Submission)
+                .WithMany(su => su.SubmissionFiles)
+                .HasForeignKey(su => su.SubmissionId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

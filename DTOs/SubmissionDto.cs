@@ -17,7 +17,7 @@ public record SubmissionCreateDto
     [RequiredField]
     DateOnly SubmittedDate,
 
-    [EnumDataType(typeof(SubmissionStatus))]
+    [ValidEnum(typeof(SubmissionStatus))]
     [RequiredField]
     SubmissionStatus? Status
 );

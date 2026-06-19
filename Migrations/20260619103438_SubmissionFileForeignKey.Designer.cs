@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TraineeManagement.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260618103356_Latest")]
-    partial class Latest
+    [Migration("20260619103438_SubmissionFileForeignKey")]
+    partial class SubmissionFileForeignKey
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -136,6 +136,50 @@ namespace TraineeManagement.Api.Migrations
                     b.HasIndex("SubmissionId");
 
                     b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("TraineeManagementApi.SubmissionFiles.Models.SubmissionFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Checksum")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StorageFileName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("SubmissionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UploadedByUserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubmissionId");
+
+                    b.ToTable("SubmissionFiles");
                 });
 
             modelBuilder.Entity("TraineeManagementApi.Submissions.Models.Submission", b =>
@@ -307,6 +351,17 @@ namespace TraineeManagement.Api.Migrations
                     b.Navigation("Submission");
                 });
 
+            modelBuilder.Entity("TraineeManagementApi.SubmissionFiles.Models.SubmissionFile", b =>
+                {
+                    b.HasOne("TraineeManagementApi.Submissions.Models.Submission", "Submission")
+                        .WithMany("SubmissionFiles")
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Submission");
+                });
+
             modelBuilder.Entity("TraineeManagementApi.Submissions.Models.Submission", b =>
                 {
                     b.HasOne("TraineeManagementApi.TaskAssignments.Models.TaskAssignment", "TaskAssignment")
@@ -360,6 +415,8 @@ namespace TraineeManagement.Api.Migrations
             modelBuilder.Entity("TraineeManagementApi.Submissions.Models.Submission", b =>
                 {
                     b.Navigation("Reviews");
+
+                    b.Navigation("SubmissionFiles");
                 });
 
             modelBuilder.Entity("TraineeManagementApi.TaskAssignments.Models.TaskAssignment", b =>

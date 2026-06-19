@@ -7,7 +7,7 @@ using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Mentors.Models;
 
-public class Mentor : ITimestamp
+public class Mentor : ICreateTimestamp,IUpdateTimestamp
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -45,7 +45,7 @@ public class Mentor : ITimestamp
         set; 
     } = string.Empty;
 
-    [EnumDataType(typeof(MentorStatus))]
+    [ValidEnum(typeof(MentorStatus))]
     [RequiredField]
     public MentorStatus? Status 
     { 

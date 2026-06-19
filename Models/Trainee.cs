@@ -6,7 +6,7 @@ using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.Trainees.Models;
 
-public class Trainee : ITimestamp
+public class Trainee : ICreateTimestamp,IUpdateTimestamp
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -45,7 +45,7 @@ public class Trainee : ITimestamp
         set; 
     } = string.Empty;
 
-    [EnumDataType(typeof(TraineeStatus))]
+    [ValidEnum(typeof(TraineeStatus))]
     [RequiredField]
     public TraineeStatus? Status 
     { 

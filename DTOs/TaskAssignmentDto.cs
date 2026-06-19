@@ -19,7 +19,7 @@ public record TaskAssignmentCreateDto
     [ValidDateRange("AssignedDate")]
     DateOnly DueDate,
 
-    [EnumDataType(typeof(TaskAssignmentStatus))]
+    [ValidEnum(typeof(TaskAssignmentStatus))]
     [RequiredField]
     TaskAssignmentStatus? Status,
 
@@ -47,7 +47,7 @@ public record TaskAssignmentResponseDto
 
 public record TaskAssignmentUpdateDto
 (
-    [EnumDataType(typeof(TaskAssignmentStatus))]
+    [ValidEnum(typeof(TaskAssignmentStatus))]
     [RequiredField]
     TaskAssignmentStatus? Status
 );

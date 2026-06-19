@@ -15,7 +15,7 @@ public record ReviewCreateDto
     
     int score,
     
-    [EnumDataType(typeof(ReviewStatus))]
+    [ValidEnum(typeof(ReviewStatus))]
     [RequiredField]
     ReviewStatus? ReviewStatus,
     

@@ -13,6 +13,7 @@ namespace TraineeManagementApi.Submissions.Cotroller;
 public class SubmissionsController : ControllerBase
 {
     private readonly ISubmissionService _submissionService;
+
     private readonly ILogger<SubmissionsController> _logger;
 
     public SubmissionsController(ISubmissionService submissionService, ILogger<SubmissionsController> logger)

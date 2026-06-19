@@ -60,7 +60,6 @@ public class ValidEnumAttribute : ValidationAttribute
 
     public ValidEnumAttribute(Type enumType)
     {
-        // Safety check to make sure developers pass an actual Enum type
         if (!enumType.IsEnum)
         {
             throw new ArgumentException("The type provided must be an Enum.");
@@ -71,10 +70,8 @@ public class ValidEnumAttribute : ValidationAttribute
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        // Let [RequiredField] handle null or empty checks
         if (value == null) return ValidationResult.Success;
 
-        // Verify if the value is defined inside the target Enum type
         bool isValidEnum = Enum.IsDefined(_enumType, value);
 
         if (!isValidEnum)
@@ -85,6 +82,3 @@ public class ValidEnumAttribute : ValidationAttribute
         return ValidationResult.Success;
     }
 }
-
-
-// [ValidEnum(typeof(TaskAssignmentStatus))]

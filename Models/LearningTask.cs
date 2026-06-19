@@ -1,13 +1,12 @@
 using TraineeManagementApi.Models.TimestampInterface;
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
 using TraineeManagementApi.TaskAssignments.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using TraineeManagementApi.Utils.CustomValidation;
 
 namespace TraineeManagementApi.LearningTasks.Models;
 
-public class LearningTask : ITimestamp
+public class LearningTask : ICreateTimestamp,IUpdateTimestamp
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -45,7 +44,7 @@ public class LearningTask : ITimestamp
         set; 
     }
 
-    [EnumDataType(typeof(LearningTaskStatus))]
+    [ValidEnum(typeof(LearningTaskStatus))]
     [RequiredField]
     public LearningTaskStatus? Status 
     { 
