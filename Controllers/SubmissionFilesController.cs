@@ -38,15 +38,14 @@ public class SubmissionFilesController : ControllerBase
     }
 
     [HttpPost("{submissionId}/files")]
-    public async Task<IActionResult> UploadFile(int submissionId, IEnumerable<IFormFile> files)
+    public async Task<IActionResult> UploadFile(int submissionId, IFormFile file)
     {
         if (!ModelState.IsValid || submissionId < 1)
         {
             return ResponseBuilder.CreateValidationErrorResponse();
         }
-        ICollection<SubmissionFileResponseDto> savedMetadataRecords = new List<SubmissionFileResponseDto>(); 
         
-        if (files == null || !files.Any())
+        if (file == null)
         {
             _logger.LogWarning("Upload attempt blocked: No files found in the multipart form-data payload request.");
             throw new BadRequestException("No files were attached to the upload request.");
@@ -57,61 +56,19 @@ public class SubmissionFilesController : ControllerBase
         {
             throw new BadRequestException("The referenced submission profile does not exist.");
         }
-
-        foreach (IFormFile file in files)
-        {   
-            if (file == null || file.Length == 0)
-                throw new BadRequestException("Empty file uploads are not allowed.");
-
-            if (file.Length > _fileConfiguration.MaxFileSizeInBytes)
-                throw new BadRequestException($"File size exceeds the allowed {_fileConfiguration.MaxFileSizeInBytes / (1024 * 1024)} MB limit.");
-
-            string ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-
-            if (!_fileConfiguration.AllowedExtensions.Contains(ext))
-            {
-                _logger.LogWarning("Unauthorized file extension block triggered for: {Extension}", ext);
-                throw new BadRequestException($"File type extension '{ext}' is not authorized.");
-            }
-
-            if (_fileConfiguration.MagicNumbers.TryGetValue(ext, out string? hexSignature) && !string.IsNullOrWhiteSpace(hexSignature))
-            {
-                byte[] expectedSignature = Convert.FromHexString(hexSignature);
-                byte[] actualHeader = new byte[expectedSignature.Length];
-
-                using (Stream stream = file.OpenReadStream())
-                {
-                    await stream.ReadExactlyAsync(actualHeader, 0, expectedSignature.Length);
-                }
-
-                if (!actualHeader.SequenceEqual(expectedSignature))
-                {
-                    _logger.LogWarning("Security: File contents for {FileName} do not match hex signature {Hex}!", file.FileName, hexSignature);
-                    throw new BadRequestException("The file contents do not match its true file type extension signature safely.");
-                }
-            }
             
-            string storedName = string.Empty;
-            try
-            {
-                using Stream readStream = file.OpenReadStream();
-                storedName = await _fileStorageService.SaveAsync(readStream, file.FileName);;
-                SubmissionFileResponseDto submissionFile = await _submissionFileService.AddSubmissionFileMetaDataAsync(submissionId,file,storedName);
-                savedMetadataRecords.Add(submissionFile);
-            }
-            catch (Exception)
-            {
-               if (!string.IsNullOrWhiteSpace(storedName))
-                {
-                    _logger.LogError("Database metadata persistence failed for file: {StoredName}.", storedName);
-                    await _fileStorageService.DeleteAsync(storedName);
-                }
-                throw new BadRequestException($"File processing operation failed completely");
-            }
+        using Stream readStream = file.OpenReadStream();
+        string? storedName = await _fileStorageService.SaveAsync(submissionId,file);
+
+        if(storedName == null)
+        {
+            throw new BadRequestException("This file is already uploaded");
         }
+        SubmissionFileResponseDto submissionFile = await _submissionFileService.AddSubmissionFileMetaDataAsync(submissionId,file,storedName);
+        
         return ResponseBuilder.CreateSuccessResponse(
             AppConstants.ApiResponse.Created,
-            savedMetadataRecords
+            submissionFile
         );        
     }
 

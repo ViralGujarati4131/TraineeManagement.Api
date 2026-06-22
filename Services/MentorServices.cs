@@ -1,7 +1,9 @@
+using System.Collections;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagementApi.Mentors.DTOs;
 using TraineeManagementApi.Mentors.Models;
 using TraineeManagementApi.Mentors.ServiceInterface;
+using TraineeManagementApi.RedisCaching.ServiceInterface;
 using TraineeManagementApi.Utils.CustomException;
 
 namespace TraineeManagementApi.Mentors.Service;
@@ -9,12 +11,18 @@ namespace TraineeManagementApi.Mentors.Service;
 public class MentorService : IMentorServices
 {
     private readonly AppDbContext _context;
+
     private readonly ILogger<MentorService> _logger;
+
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(10);
+
+    private readonly ICacheService _cacheService;
     
-    public MentorService(AppDbContext context, ILogger<MentorService> logger)
+    public MentorService(AppDbContext context, ILogger<MentorService> logger,ICacheService cacheService)
     {
         _context = context;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public MentorResponseDto MapToResponseDto(Mentor mentor)
@@ -36,18 +44,38 @@ public class MentorService : IMentorServices
     public async Task<IEnumerable<MentorResponseDto>> GetMentorsAsync()
     {
         _logger.LogDebug("Fetching all mentors from the database");
+
+        string cacheKey = "Mentors:All";
+        IEnumerable<MentorResponseDto>? cached = await _cacheService.GetAsync<IEnumerable<MentorResponseDto>>(cacheKey);
+        if (cached != null)
+        {
+            _logger.LogDebug("Returning mentors from cache");
+            return cached;
+        }
         
-        return await _context.Mentors
+        IEnumerable<MentorResponseDto> mentors = await _context.Mentors
             .AsNoTracking()
             .Select(m => new MentorResponseDto(m.Id, m.FirstName, m.LastName))
             .ToListAsync();
+
+        await _cacheService.SetAsync(cacheKey,mentors,CacheTtl);
+
+        return mentors;
     }
 
     public async Task<MentorResponseDto> GetMentorByIdAsync(int id)
     {
         _logger.LogDebug("Retrieving mentor profile with ID: {MentorId}", id);
 
-        var dto = await _context.Mentors
+        string cacheKey = $"Mentor:{id}";
+        MentorResponseDto? cached = await _cacheService.GetAsync<MentorResponseDto>(cacheKey);
+        if (cached != null)
+        {
+            _logger.LogDebug("Returning mentors from cache");
+            return cached;
+        }
+
+        MentorResponseDto? dto = await _context.Mentors
             .AsNoTracking()
             .Where(m => m.Id == id)
             .Select(m => new MentorResponseDto(m.Id, m.FirstName, m.LastName))
@@ -58,6 +86,7 @@ public class MentorService : IMentorServices
             _logger.LogWarning("Mentor with ID {MentorId} was not found during target DTO projection.", id);
             throw new NotFoundException("Mentor");
         }
+        await _cacheService.SetAsync(cacheKey,dto,CacheTtl);
         
         return dto;
     }
@@ -77,6 +106,9 @@ public class MentorService : IMentorServices
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully created new mentor with ID {MentorId} and FirstName {FirstName}", mentor.Id, mentor.FirstName);
+        
+        await _cacheService.RemoveAsync("Mentors:All");
+        
         return MapToResponseDto(mentor);
     }
 
@@ -88,6 +120,9 @@ public class MentorService : IMentorServices
         
         _context.Mentors.Remove(mentor);
         await _context.SaveChangesAsync();
+
+        await _cacheService.RemoveAsync($"Mentor:{id}");
+        await _cacheService.RemoveAsync("Mentors:All");
 
         _logger.LogInformation("Successfully deleted mentor record with ID {MentorId}", id);
     }
@@ -106,6 +141,9 @@ public class MentorService : IMentorServices
 
         await _context.SaveChangesAsync();
         _logger.LogInformation("Successfully updated mentor profile for ID {MentorId}", id);
+
+        await _cacheService.RemoveAsync($"Mentor:{id}");
+        await _cacheService.RemoveAsync("Mentors:All");
         
         return MapToResponseDto(mentor);
     }

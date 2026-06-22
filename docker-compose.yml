@@ -1,0 +1,22 @@
+services:
+  db:
+    image: docker-registry-002.zeuslearning.com/zeuslearning/mysql:8.0.41
+    container_name: dotnetmysqldb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Ram@19
+      MYSQL_DATABASE: trainee_management_db
+    ports:
+      - "3309:3306"
+    volumes:
+      - dotnetmysqldb:/var/lib/mysql
+   
+  redis-cache:
+    image: docker-registry-002.zeuslearning.com/zeuslearning/redis:alpine
+    container_name: dotnetrediscache
+    restart: always
+    ports:
+      - "6379:6379"
+ 
+volumes:
+  dotnetmysqldb:

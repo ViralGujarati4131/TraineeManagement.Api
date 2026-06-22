@@ -3,18 +3,26 @@ using TraineeManagementApi.TaskAssignments.ServiceInterface;
 using TraineeManagementApi.TaskAssignments.DTOs;
 using TraineeManagementApi.TaskAssignments.Models;
 using TraineeManagementApi.Utils.CustomException;
+using TraineeManagementApi.RedisCaching.ServiceInterface;
 
 namespace TraineeManagementApi.TaskAssignments.Service;
 
 public class TaskAssignmentService : ITaskAssignmentService
 {
     private readonly AppDbContext _context;
+
     private readonly ILogger<TaskAssignmentService> _logger;
 
-    public TaskAssignmentService(AppDbContext context, ILogger<TaskAssignmentService> logger)
+    private readonly ICacheService _cacheService;
+
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(10);
+
+
+    public TaskAssignmentService(AppDbContext context, ILogger<TaskAssignmentService> logger,ICacheService cacheService)
     {
         _context = context;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     private TaskAssignmentResponseDto MapToResponseDto(TaskAssignment taskAssignment)
@@ -59,14 +67,25 @@ public class TaskAssignmentService : ITaskAssignmentService
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully created new taskAssignment with ID {AssignmentId}", taskAssignment.Id);
+
+        await _cacheService.RemoveAsync("TaskAssignments:All");
+
         return MapToResponseDto(taskAssignment);
     }
 
     public async Task<IEnumerable<TaskAssignmentResponseDto>> GetTaskAssignmentsAsync()
     {
         _logger.LogDebug("Fetching all taskAssignments from the database");
+
+        string cacheKey = "TaskAssignments:All";
+        IEnumerable<TaskAssignmentResponseDto>? cached = await _cacheService.GetAsync<IEnumerable<TaskAssignmentResponseDto>>(cacheKey);
+        if (cached != null)
+        {
+            _logger.LogDebug("Returning taskAssignments from cache");
+            return cached;
+        }
         
-        return await _context.TaskAssignments
+        IEnumerable<TaskAssignmentResponseDto> taskAssignmentResponses = await _context.TaskAssignments
             .AsNoTracking()
             .Select(ta => new TaskAssignmentResponseDto(
                 ta.Id,
@@ -78,13 +97,25 @@ public class TaskAssignmentService : ITaskAssignmentService
                 ta.Status,
                 ta.Remarks
             )).ToListAsync();
+
+        await _cacheService.SetAsync(cacheKey,taskAssignmentResponses,CacheTtl);
+
+        return taskAssignmentResponses;
     }
 
     public async Task<TaskAssignmentResponseDto> GetTaskAssignmentByIdAsync(int id)
     {
         _logger.LogDebug("Retrieving taskAssignment with ID: {AssignmentId}", id);
 
-        var dto = await _context.TaskAssignments
+        string cacheKey = $"TaskAssignment:{id}";
+        TaskAssignmentResponseDto? cached = await _cacheService.GetAsync<TaskAssignmentResponseDto>(cacheKey);
+        if (cached != null)
+        {
+            _logger.LogDebug("Returning taskAssignment from cache");
+            return cached;
+        }
+
+        TaskAssignmentResponseDto? dto = await _context.TaskAssignments
             .AsNoTracking()
             .Where(ta => ta.Id == id)
             .Select(ta => new TaskAssignmentResponseDto(
@@ -103,6 +134,7 @@ public class TaskAssignmentService : ITaskAssignmentService
             _logger.LogWarning("TaskAssignment with ID {AssignmentId} was not found during target DTO projection.", id);
             throw new NotFoundException("TaskAssignment");
         }
+        await _cacheService.SetAsync(cacheKey,dto,CacheTtl);
         
         return dto;
     }
@@ -117,6 +149,10 @@ public class TaskAssignmentService : ITaskAssignmentService
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully updated taskAssignment for ID {AssignmentId}", id);
+
+        await _cacheService.RemoveAsync("TaskAssignments:All");
+        await _cacheService.RemoveAsync($"TaskAssignment:{id}");
+    
         return MapToResponseDto(taskAssignment);
     }
 }

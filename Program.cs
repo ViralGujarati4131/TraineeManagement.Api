@@ -19,7 +19,7 @@ using TraineeManagementApi.Submissions.ServiceInterface;
 using TraineeManagementApi.Submissions.Service;
 using TraineeManagementApi.Reviews.ServiceInterface;
 using TraineeManagementApi.Reviews.Service;
-using Microsoft.OpenApi.Models;
+// using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using TraineeManagementApi.FileStorage.ServiceInterface;
 using TraineeManagementApi.FileStorage.Service;
@@ -27,6 +27,11 @@ using TraineeManagementApi.SubmissionFiles.ServiceInterface;
 using TraineeManagementApi.SubmissionFiles.Service;
 using TraineeManagementApi.FileStorage.Configurations;
 using TraineeManagementApi.Constants;
+using TraineeManagementApi.RedisCaching.ServiceInterface;
+using TraineeManagementApi.RedisCaching.Service;
+using StackExchange.Redis;
+using System.Data;
+using MySqlConnector;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -54,42 +59,50 @@ builder.Services.AddControllers()
 
 // db connection
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 MySqlServerVersion serverVersion = new MySqlServerVersion(new Version(8, 0, 46));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, serverVersion)
 );
 
-// to take bearer token from user
-builder.Services.AddOpenApi("v1", options =>
+
+// redis connection
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    options.AddDocumentTransformer((document, context, cancellationToken) =>
-    {
-        OpenApiSecurityScheme scheme = new OpenApiSecurityScheme
-        {
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Description = "Enter your JWT token directly"
-        };
-        document.Components ??= new OpenApiComponents();
-        document.Components.SecuritySchemes.Add("Bearer", scheme);
-        document.SecurityRequirements.Add(new OpenApiSecurityRequirement
-        {
-            [new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            }] = Array.Empty<string>()
-        });
-        return Task.CompletedTask;
-    });
+    string configuration = builder.Configuration["Redis:ConnectionString"]!;
+    return ConnectionMultiplexer.Connect(configuration);
 });
+
+
+// // to take bearer token from user
+// builder.Services.AddOpenApi("v1", options =>
+// {
+//     options.AddDocumentTransformer((document, context, cancellationToken) =>
+//     {
+//         OpenApiSecurityScheme scheme = new OpenApiSecurityScheme
+//         {
+//             Type = SecuritySchemeType.Http,
+//             Scheme = "bearer",
+//             BearerFormat = "JWT",
+//             In = ParameterLocation.Header,
+//             Description = "Enter your JWT token directly"
+//         };
+//         document.Components ??= new OpenApiComponents();
+//         document.Components.SecuritySchemes.Add("Bearer", scheme);
+//         document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+//         {
+//             [new OpenApiSecurityScheme
+//             {
+//                 Reference = new OpenApiReference
+//                 {
+//                     Type = ReferenceType.SecurityScheme,
+//                     Id = "Bearer"
+//                 }
+//             }] = Array.Empty<string>()
+//         });
+//         return Task.CompletedTask;
+//     });
+// });
 
 // to validate the bearer token
 IConfigurationSection jwtSettings = builder.Configuration.GetSection("JWT");
@@ -131,6 +144,7 @@ builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IFileStorageService,FileStorageService>();
 builder.Services.AddScoped<ISubmissionFileService,SubmissionFileService>();
+builder.Services.AddScoped<ICacheService,CacheService>();
 
 // react origin
 string[] allowedOrigin = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
@@ -153,7 +167,7 @@ builder.Services.AddCors(options =>
                       });
 });
 
-builder.Services.AddOpenApi();
+// builder.Services.AddOpenApi();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -162,14 +176,14 @@ WebApplication app = builder.Build();
 // seed the user
 await UserSeeder.SeedAsync(app.Services);
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwaggerUi(options =>
-    {
-        options.DocumentPath = "/openapi/v1.json";
-    });
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     app.MapOpenApi();
+//     app.UseSwaggerUi(options =>
+//     {
+//         options.DocumentPath = "/openapi/v1.json";
+//     });
+// }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();

@@ -47,7 +47,7 @@ public class TraineeService : ITraineeService
     {
         _logger.LogDebug("Retrieving trainee profile with ID: {TraineeId}", id);
 
-        var dto = await _context.Trainees
+        TraineeResponseDto? dto = await _context.Trainees
             .AsNoTracking()
             .Where(t => t.Id == id)
             .Select(t => new TraineeResponseDto(t.Id, t.FirstName, t.LastName))
