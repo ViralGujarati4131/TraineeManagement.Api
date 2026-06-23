@@ -131,6 +131,12 @@ CREATE DATABASE trainee_management_db;
 
 Refer `appsettings.Development.template.json` and add accordingly your react cors, connection string, File configuration and jwt credential in `appsettings.Development.json`
 
+
+## Configure `docker-compose.yml`
+
+Refer `docker-compose.template.yml` and add the image of the redis, mysql and define port for mysql on your end and set database name also add your password credential in  `docker-compose.yml`
+
+
 **Linux :** 
 ```bash
 export ASPNETCORE_ENVIRONMENT=Development 
