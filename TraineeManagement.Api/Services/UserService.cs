@@ -5,7 +5,7 @@ using TraineeManagement.Api.Data.UserDTO;
 using TraineeManagement.Api.Data.UserModel;
 using TraineeManagement.Api.UserServiceInterface;
 using TraineeManagement.Api.JwtService;
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 
 namespace TraineeManagement.Api.UserService;
 

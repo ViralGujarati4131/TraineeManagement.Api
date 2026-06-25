@@ -1,14 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using TraineeManagement.Api.Data.AppDbContext;
 
 #nullable disable
 
-namespace TraineeManagement.Api.Migrations
+namespace TraineeManagement.Api.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class SubmissionFileForeignKey : Migration
+    public partial class AddProcessingJobTracking : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,7 +28,7 @@ namespace TraineeManagement.Api.Migrations
                     ExpectedTechStack = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DueDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
+                    Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
@@ -54,7 +53,7 @@ namespace TraineeManagement.Api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Expertise = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
+                    Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
@@ -62,6 +61,26 @@ namespace TraineeManagement.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Mentors", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ProcessingJobs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    CorrelationId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SubmissionId = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Attempts = table.Column<int>(type: "int", nullable: false),
+                    ErrorSummary = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StartedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProcessingJobs", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -79,7 +98,7 @@ namespace TraineeManagement.Api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     TechStack = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
+                    Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
@@ -100,7 +119,7 @@ namespace TraineeManagement.Api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PasswordHash = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Role = table.Column<string>(type: "longtext", nullable: false)
+                    Role = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
@@ -122,7 +141,7 @@ namespace TraineeManagement.Api.Migrations
                     LearningTaskId = table.Column<int>(type: "int", nullable: false),
                     AssignedDate = table.Column<DateOnly>(type: "date", nullable: false),
                     DueDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
+                    Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Remarks = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -163,7 +182,7 @@ namespace TraineeManagement.Api.Migrations
                     Notes = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     SubmittedDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
+                    Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -189,7 +208,7 @@ namespace TraineeManagement.Api.Migrations
                     Feedback = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Score = table.Column<int>(type: "int", nullable: false),
-                    ReviewStatus = table.Column<string>(type: "longtext", nullable: false)
+                    ReviewStatus = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ReviewedDate = table.Column<DateOnly>(type: "date", nullable: false)
                 },
@@ -288,6 +307,9 @@ namespace TraineeManagement.Api.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ProcessingJobs");
+
             migrationBuilder.DropTable(
                 name: "Reviews");
 

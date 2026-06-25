@@ -6,7 +6,7 @@
     using TraineeManagement.Api.Data.SubmissionFileModel;
     using TraineeManagement.Api.Data.SubmissionModel;
     using TraineeManagement.Api.Data.CustomException;
-    using TraineeManagement.Api.Data.AppDbContext;
+    using TraineeManagement.Api.Data.DatabaseContext;
 
     namespace TraineeManagement.Api.FileStorageService;
 

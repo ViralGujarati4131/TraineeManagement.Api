@@ -12,7 +12,7 @@ using TraineeManagement.Api.SubmissionFileServiceInterface;
 using TraineeManagement.Api.FileStoreValidation;
 using Microsoft.Extensions.Options;
 using TraineeManagement.Api.Contract.SubmissionProcessingContarct;
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 
 namespace TraineeManagement.Api.SubmissionFileController;
 

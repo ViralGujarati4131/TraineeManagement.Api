@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TraineeManagement.Api.Messaging.RabbitMqConnectionSettings;
 using TraineeManagement.Api.Worker.SubmissionProcessingConsumer;   
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 using TraineeManagement.Api.Messaging.RabbitMqConnection;
 using TraineeManagement.Api.CacheService;
 using TraineeManagement.Api.CacheServiceInterface;

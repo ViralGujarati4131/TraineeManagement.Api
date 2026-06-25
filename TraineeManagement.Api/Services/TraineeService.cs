@@ -5,7 +5,7 @@ using TraineeManagement.Api.Data.TraineeModel;
 using TraineeManagement.Api.TraineeServiceInterface;
 using TraineeManagement.Api.Data.CustomException;
 using TraineeManagement.Api.Data.CacheKey;
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 
 namespace TraineeManagement.Api.TraineeService;
 

@@ -5,7 +5,7 @@ using TraineeManagement.Api.Data.SubmissionFileModel;
 using TraineeManagement.Api.Data.Constants;
 using TraineeManagement.Api.Contract.SubmissionProcessingContarct;
 using TraineeManagement.Api.Messaging.RabbitMQPublisher;
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 
 namespace TraineeManagement.Api.SubmissionFileService;
 

@@ -5,7 +5,7 @@ using TraineeManagement.Api.LearningTaskServiceInterface;
 using TraineeManagement.Api.CacheServiceInterface;
 using TraineeManagement.Api.Data.CustomException;
 using TraineeManagement.Api.Data.CacheKey;
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 
 namespace TraineeManagement.Api.LearningTaskService;
 

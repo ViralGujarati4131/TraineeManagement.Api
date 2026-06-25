@@ -10,7 +10,7 @@ using TraineeManagement.Api.Data.ReviewModel;
 using TraineeManagement.Api.Data.SubmissionFileModel;
 using TraineeManagement.Api.Data.ProcessingJobModel;
 
-namespace TraineeManagement.Api.Data.AppDbContext;
+namespace TraineeManagement.Api.Data.DatabaseContext;
 
 public class AppDbContext : DbContext
 {

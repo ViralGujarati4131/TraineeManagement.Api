@@ -9,7 +9,7 @@ using TraineeManagement.Api.FileStoreValidation;
 using StackExchange.Redis;
 using TraineeManagement.Api.Messaging.RabbitMQPublisher;
 using TraineeManagement.Api.Messaging.RabbitMqConnectionSettings;
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 using TraineeManagement.Api.Data.Constants;
 using TraineeManagement.Api.Messaging.RabbitMqConnection;
 

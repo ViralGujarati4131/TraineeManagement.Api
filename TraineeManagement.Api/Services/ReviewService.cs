@@ -6,7 +6,7 @@ using TraineeManagement.Api.Data.ReviewModel;
 using TraineeManagement.Api.ReviewServiceInterface;
 using TraineeManagement.Api.Data.CustomException;
 using TraineeManagement.Api.Data.CacheKey;
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 
 namespace TraineeManagement.Api.ReviewService;
 

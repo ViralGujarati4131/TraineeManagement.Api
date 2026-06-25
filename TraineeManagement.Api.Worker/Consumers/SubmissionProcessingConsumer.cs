@@ -4,15 +4,15 @@ using System.Text;
 using System.Text.Json;
 using TraineeManagement.Api.Contract.SubmissionProcessingContarct;
 using Microsoft.EntityFrameworkCore;
-using TraineeManagement.Api.Data.AppDbContext;
+using TraineeManagement.Api.Data.DatabaseContext;
 using TraineeManagement.Api.Data.TaskAssignmentModel;
 using TraineeManagement.Api.Messaging.RabbitMqConnection;
 using TraineeManagement.Api.Data.Constants;
 using TraineeManagement.Api.CacheServiceInterface;
-using TraineeManagement.Api.Data.CacheKey;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using TraineeManagement.Api.Data.ProcessingJobModel;
 
 namespace TraineeManagement.Api.Worker.SubmissionProcessingConsumer;
 
@@ -22,6 +22,9 @@ public class SubmissionProcessingConsumer : BackgroundService
     private readonly RabbitConnection _connection;  
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ICacheService _cacheService;
+    
+    private const string TargetQueueName = "submission-processing";
+    private const int MaxRetryAttempts = 3;
 
     public SubmissionProcessingConsumer(
         ILogger<SubmissionProcessingConsumer> logger, 
@@ -37,20 +40,16 @@ public class SubmissionProcessingConsumer : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _connection.RegisterQueueAsync(AppConstants.RabbitMQ.SubmissionProcessing);
+        await _connection.InitializeAsync();
+        await _connection.RegisterQueueAsync(TargetQueueName);
 
         if (_connection.Channel is null)
         {
-            _logger.LogError("RabbitMQ channel failed to initialize for queue: {Queue}", AppConstants.RabbitMQ.SubmissionProcessing);
+            _logger.LogError("RabbitMQ channel failed to initialize.");
             return;
         }
 
-        await _connection.Channel.BasicQosAsync(
-            prefetchSize: 0, 
-            prefetchCount: 1, 
-            global: false, 
-            cancellationToken: stoppingToken
-        );
+        await _connection.Channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false, cancellationToken: stoppingToken);
 
         var consumer = new AsyncEventingBasicConsumer(_connection.Channel);
 
@@ -63,78 +62,133 @@ public class SubmissionProcessingConsumer : BackgroundService
             try
             {
                 message = JsonSerializer.Deserialize<SubmissionProcessingContract>(json);
+                if (message == null) throw new JsonException("Invalid message contract format.");
 
-                if (message == null)
-                    throw new Exception("Invalid message format.");
- 
-                _logger.LogInformation(
-                    "Processing SubmissionId={SubmissionId}, MessageId={MessageId}, CorrelationId={CorrelationId}",
-                    message.SubmissionId, message.MessageId, message.CorrelationId
-                );
+                _logger.LogInformation("De-queuing MessageId={MessageId} for validation...", message.MessageId);
 
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                    var submission = await dbContext.Submissions
-                        .FirstOrDefaultAsync(s => s.Id == message.SubmissionId, stoppingToken);
+                    var existingJob = await dbContext.ProcessingJobs.FirstOrDefaultAsync(j => j.Id == message.MessageId, stoppingToken);
 
-                    if (submission == null)
+                    if (existingJob != null && existingJob.Status == 3) 
                     {
-                        _logger.LogWarning("Submission with ID {SubmissionId} not found in database.", message.SubmissionId);
+                        _logger.LogWarning("Idempotency Alert: MessageId={MessageId} has already been fully processed. Skipping execution.", message.MessageId);
+                        await _connection.Channel.BasicAckAsync(ea.DeliveryTag, multiple: false, stoppingToken);
+                        return;
+                    }
+
+                    if (existingJob == null)
+                    {
+                        existingJob = new ProcessingJob
+                        {
+                            Id = message.MessageId,
+                            CorrelationId = message.CorrelationId,
+                            SubmissionId = message.SubmissionId,
+                            Status = 2, 
+                            Attempts = 1,
+                            StartedAt = DateTime.UtcNow
+                        };
+                        dbContext.ProcessingJobs.Add(existingJob);
                     }
                     else
                     {
-                        var assignmentId = submission.TaskAssignmentId;
+                        existingJob.Status = 2;
+                        existingJob.Attempts++;
+                    }
+                    await dbContext.SaveChangesAsync(stoppingToken);
 
-                        var assignment = await dbContext.TaskAssignments
-                            .FirstOrDefaultAsync(a => a.Id == assignmentId, stoppingToken);
+                    _logger.LogInformation("Executing background calculation task for SubmissionId={SubmissionId}...", message.SubmissionId);
 
-                        if (assignment != null)
-                        {
-                            assignment.Status = TaskAssignmentStatus.Submitted; 
+                    await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
 
-                            await dbContext.SaveChangesAsync(stoppingToken);
+                    var submission = await dbContext.Submissions.FirstOrDefaultAsync(s => s.Id == message.SubmissionId, stoppingToken);
+                    if (submission == null)
+                    {
+                        throw new KeyNotFoundException($"Submission entry targeting identity reference {message.SubmissionId} is missing.");
+                    }
 
-                            await _cacheService.RemoveAsync(CacheKey.TaskAssignment(assignmentId));
-                            
-                            _logger.LogInformation("Successfully updated TaskAssignmentId={AssignmentId} Status to 2", assignmentId);
-                        }
-                        else
-                        {
-                            _logger.LogWarning("TaskAssignment with ID {AssignmentId} not found.", assignmentId);
-                        }
+                    var assignment = await dbContext.TaskAssignments.FirstOrDefaultAsync(a => a.Id == submission.TaskAssignmentId, stoppingToken);
+                    if (assignment != null)
+                    {
+                        assignment.Status = TaskAssignmentStatus.Submitted;
+                    }
+
+                    existingJob.Status = 3; 
+                    existingJob.CompletedAt = DateTime.UtcNow;
+                    
+                    await dbContext.SaveChangesAsync(stoppingToken);
+
+                    if (assignment != null)
+                    {
+                        // Safe key cache clearing post state transition completion
+                        await _cacheService.RemoveAsync($"task-assignment:{assignment.Id}");
                     }
                 }
 
+                // Explicit manual Acknowledgment confirmation 
                 await _connection.Channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
-
-                _logger.LogInformation("Successfully processed and Acknowledged SubmissionId={SubmissionId}", message.SubmissionId);
+                _logger.LogInformation("Successfully completed and acknowledged processing loop for MessageId={MessageId}", message.MessageId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to process message. Negative acknowledgment triggered: {Json}", json);
-
-                await _connection.Channel.BasicNackAsync(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false, cancellationToken: stoppingToken);
+                _logger.LogError(ex, "Exception thrown while executing asynchronous job processing routine.");
+                await HandleFailureAsync(ea, message, json, ex, stoppingToken);
             }
         };
 
-        await _connection.Channel.BasicConsumeAsync(
-            queue: AppConstants.RabbitMQ.SubmissionProcessing,
-            autoAck: false, 
-            consumer: consumer,
-            cancellationToken: stoppingToken
-        );
+        await _connection.Channel.BasicConsumeAsync(queue: TargetQueueName, autoAck: false, consumer: consumer, cancellationToken: stoppingToken);
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
+    private async Task HandleFailureAsync(BasicDeliverEventArgs ea, SubmissionProcessingContract? message, string json, Exception exception, CancellationToken stoppingToken)
     {
-        if (_connection?.Channel is not null)
-            await _connection.Channel.DisposeAsync();
+        try
+        {
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        if (_connection is not null)
-            await _connection.DisposeAsync();
+                bool isPermanentFailure = exception is JsonException || exception is KeyNotFoundException;
 
-        await base.StopAsync(cancellationToken);
+                if (message != null)
+                {
+                    var job = await dbContext.ProcessingJobs.FirstOrDefaultAsync(j => j.Id == message.MessageId, stoppingToken);
+                    if (job != null)
+                    {
+                        job.ErrorSummary = exception.Message;
+                    
+                        if (isPermanentFailure || job.Attempts >= MaxRetryAttempts)
+                        {
+                            job.Status = 4; 
+                            job.CompletedAt = DateTime.UtcNow;
+                            _logger.LogError("Critical Job Failure: MessageId={MessageId} marked as FAILED permanently.", message.MessageId);
+                        }
+                        else
+                        {
+                            job.Status = 1; 
+                            _logger.LogWarning("Transient Failure: MessageId={MessageId} scheduled for retry sequence.", message.MessageId);
+                        }
+                        
+                        await dbContext.SaveChangesAsync(stoppingToken);
+                    }
+                }
+
+                if (isPermanentFailure)
+                {
+                    // Acknowledge bad payload structure format so it is cleared away immediately without poisonous requeues
+                    await _connection.Channel!.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false, cancellationToken: stoppingToken);
+                }
+                else
+                {
+                    // For verified transient infrastructure degradation, bounce message right back up into the loop
+                    await _connection.Channel!.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: true, cancellationToken: stoppingToken);
+                }
+            }
+        }
+        catch (Exception criticalDbException)
+        {
+            _logger.LogCritical(criticalDbException, "Fatal processing handler fault encountered. State tracking boundary compromised.");
+        }
     }
 }
