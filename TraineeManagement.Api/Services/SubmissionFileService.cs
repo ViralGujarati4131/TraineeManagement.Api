@@ -6,6 +6,7 @@ using TraineeManagement.Api.Data.Constants;
 using TraineeManagement.Api.Contract.SubmissionProcessingContarct;
 using TraineeManagement.Api.Messaging.RabbitMQPublisher;
 using TraineeManagement.Api.Data.DatabaseContext;
+using TraineeManagement.Api.Data.ProcessingJobModel;
 
 namespace TraineeManagement.Api.SubmissionFileService;
 
@@ -27,14 +28,27 @@ public class SubmissionFileService : ISubmissionFileService
         _rabbitMqService = rabbitMqService;
     }
 
-    public async Task<SubmissionPublishResult> RequestProcessing(int submissionId, int fileId)
+    public async Task<SubmissionPublishResult> RequestProcessing(int submissionId, int submissionFileId)
     {
+         ProcessingJob processingJob = new ProcessingJob{
+                MessageId = Guid.NewGuid(),
+                CorrelationId = Guid.NewGuid(),
+                SubmissionId = submissionId,
+                SubmissionFileId = submissionFileId,
+                Status = ProcessingJobStatus.Queued, 
+                Attempts = 0,
+                RequestedAt = DateTime.UtcNow
+            };
+        _context.ProcessingJobs.Add(processingJob);
+        await _context.SaveChangesAsync();
+
         SubmissionProcessingContract message = new SubmissionProcessingContract
         (
-            MessageId: Guid.NewGuid(),
-            CorrelationId: Guid.NewGuid(),
-            SubmissionId: submissionId,
-            FileId: fileId,
+            ProcessingJobId: processingJob.Id,
+            MessageId: processingJob.MessageId,
+            CorrelationId: processingJob.CorrelationId,
+            TaskAssignmentId: processingJob.SubmissionId,
+            SubmissionFileId: processingJob.SubmissionFileId,
             RequestedAt: DateTimeOffset.UtcNow,
             ContractVersion: "1.0"
         );
@@ -43,6 +57,7 @@ public class SubmissionFileService : ISubmissionFileService
             await _rabbitMqService.PublishAsync(message);
             return new SubmissionPublishResult
             (
+                processingJob.Id,
                 message.MessageId,
                 message.CorrelationId,
                 true
@@ -50,8 +65,10 @@ public class SubmissionFileService : ISubmissionFileService
         }
         catch
         {
+            _context.ProcessingJobs.Remove(processingJob);
             return new SubmissionPublishResult
             (
+                0,
                 message.MessageId,
                 message.CorrelationId,
                 false

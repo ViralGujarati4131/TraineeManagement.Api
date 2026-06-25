@@ -27,9 +27,9 @@ public class RabbitMqService
             return;
         }
 
-        var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+        byte[] body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
 
-        var properties = new BasicProperties
+        BasicProperties properties = new BasicProperties
         {
             DeliveryMode = DeliveryModes.Persistent
         };
@@ -43,8 +43,8 @@ public class RabbitMqService
         );
 
         _logger.LogInformation(
-            "Published message: MessageId={MessageId}, CorrelationId={CorrelationId}, SubmissionId={SubmissionId}",
-            message.MessageId, message.CorrelationId, message.SubmissionId
+            "Published message: MessageId={MessageId}, CorrelationId={CorrelationId}, SubmissionFileId={SubmissionFileId}",
+            message.MessageId, message.CorrelationId, message.SubmissionFileId
         );
     }
 }

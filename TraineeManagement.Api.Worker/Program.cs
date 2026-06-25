@@ -6,11 +6,13 @@ using TraineeManagement.Api.Messaging.RabbitMqConnection;
 using TraineeManagement.Api.CacheService;
 using TraineeManagement.Api.CacheServiceInterface;
 using StackExchange.Redis;
+using TraineeManagement.Api.FileStoreValidation;
+using TraineeManagement.Api.Data.Constants;
 
-var builder = Host.CreateApplicationBuilder(args);
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 46));
+MySqlServerVersion serverVersion = new MySqlServerVersion(new Version(8, 0, 46));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, serverVersion)
@@ -31,11 +33,16 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 builder.Services.AddSingleton<RabbitConnection>();
 builder.Services.AddHostedService<SubmissionProcessingConsumer>();
 
-var host = builder.Build();
 
-using (var scope = host.Services.CreateScope())
+builder.Services.Configure<CustomFileStoreValidation>(
+    builder.Configuration.GetSection(AppConstants.ConfigSections.FileStorage)
+);
+
+IHost host = builder.Build();
+
+using (IServiceScope scope = host.Services.CreateScope())
 {
-    var conn = scope.ServiceProvider.GetRequiredService<RabbitConnection>();
+    RabbitConnection conn = scope.ServiceProvider.GetRequiredService<RabbitConnection>();
     await conn.InitializeAsync();
 }
 

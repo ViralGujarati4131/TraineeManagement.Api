@@ -26,7 +26,8 @@ namespace TraineeManagement.Api.Messaging.RabbitMqConnection
                 Port = _settings.Port,
                 VirtualHost = _settings.VirtualHost,
                 UserName = _settings.Username,
-                Password = _settings.Password
+                Password = _settings.Password,
+                AutomaticRecoveryEnabled = true
             };
         }
 

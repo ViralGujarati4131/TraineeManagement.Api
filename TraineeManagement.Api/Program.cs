@@ -128,9 +128,9 @@ WebApplication app = builder.Build();
 
 
 // establish connection for the rabbit
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    var conn = scope.ServiceProvider.GetRequiredService<RabbitConnection>();
+    RabbitConnection conn = scope.ServiceProvider.GetRequiredService<RabbitConnection>();
     await conn.InitializeAsync();
 }
 

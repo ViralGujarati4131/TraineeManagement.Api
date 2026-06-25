@@ -14,10 +14,13 @@ namespace TraineeManagement.Api.Data.Response;
         new(201, "2010", "Data created successfully");
             
     public static readonly CustomResponseDescriptor Updated = 
-        new(200, "2020", "Data updated successfully");
+        new(200, "2030", "Data updated successfully");
 
     public static readonly CustomResponseDescriptor NoContent = 
         new(204, "2040", "No content found for this request");
+
+    public static readonly CustomResponseDescriptor Successlly_Uploaded = 
+        new(202, "2020", "File Uploaded Successfully");
 
 
     //  CLIENT SIDE ERRORS  
@@ -53,17 +56,20 @@ namespace TraineeManagement.Api.Data.Response;
     // SERVER ERRORS 
     
     public static readonly CustomResponseDescriptor InternalServerError = 
-            new(500, "5000", "Something went wrong internally, please try again");
+        new(500, "5010", "Something went wrong internally, please try again");
             
     public static readonly CustomResponseDescriptor JwtAuthError = 
-        new(500, "5010", "An unexpected error occurred while processing encryption signatures");
+        new(500, "5020", "An unexpected error occurred while processing encryption signatures");
             
     public static readonly CustomResponseDescriptor JwtSecretMissing = 
-        new(500, "5015", "Critical configuration mismatch: JWT Secret Key not configured");
+        new(500, "5030", "Critical configuration mismatch: JWT Secret Key not configured");
 
     public static readonly CustomResponseDescriptor FileStorageConfigError = 
-        new(500, "5001", "File storage subsystem is misconfigured.");
+        new(500, "5040", "File storage subsystem is misconfigured.");
             
     public static readonly CustomResponseDescriptor DataSeedingError = 
-        new(500, "5002", "System data seeding failed.");
+        new(500, "5050", "System data seeding failed.");
+
+    public static readonly CustomResponseDescriptor JsonConversionError = 
+        new(500, "5060", "Json Conversion Failed");
 }

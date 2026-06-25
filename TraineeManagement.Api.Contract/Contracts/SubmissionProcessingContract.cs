@@ -2,13 +2,15 @@ namespace TraineeManagement.Api.Contract.SubmissionProcessingContarct;
 
 public record SubmissionProcessingContract
 (
+    int ProcessingJobId,
+    
     Guid MessageId,
 
     Guid CorrelationId,
 
-    int SubmissionId,
+    int TaskAssignmentId,
 
-    int FileId,
+    int SubmissionFileId,
     
     DateTimeOffset RequestedAt, 
   
@@ -17,6 +19,8 @@ public record SubmissionProcessingContract
     
 public record SubmissionPublishResult
 (
+    int ProcessingJobId,
+    
     Guid MessageId,
 
     Guid CorrelationId,

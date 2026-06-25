@@ -17,6 +17,9 @@
   "RabbitMQ": {
     "Username": "<RabbitMQ_Username>",
     "Password": "<RabbitMQ_Password>"
+  },
+  "FileStorage": {
+    "BasePath": ""
   }
 }
 

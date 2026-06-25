@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using TraineeManagement.Api.LearningTaskService;
 using TraineeManagement.Api.LearningTaskServiceInterface;
 using TraineeManagement.Api.MentorService;
@@ -20,6 +19,8 @@ using TraineeManagement.Api.SubmissionFileService;
 using TraineeManagement.Api.CacheServiceInterface;
 using TraineeManagement.Api.CacheService;
 using TraineeManagement.Api.JwtService;
+using TraineeManagement.Api.ProcessingJobService;
+using TraineeManagement.Api.ProcessingJobServiceInterface;
 
 namespace Microsoft.Extensions.DependencyInjection; 
 
@@ -38,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<ISubmissionFileService, SubmissionFileService>();
         services.AddScoped<ICacheService, CacheService>();
+        services.AddScoped<IProcessingJobService,ProcessingJobService>();
 
         return services;
     }

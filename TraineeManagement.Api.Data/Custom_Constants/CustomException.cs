@@ -61,3 +61,9 @@ public class DataSeedingException : BaseApplicationException
     public DataSeedingException() 
         : base(CustomResponse.DataSeedingError) {}
 }
+
+public class JsonConversionException : BaseApplicationException
+{
+    public JsonConversionException() 
+        : base(CustomResponse.JsonConversionError) {}
+}

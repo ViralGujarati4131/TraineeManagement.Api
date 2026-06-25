@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TraineeManagement.Api.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddProcessingJobTracking : Migration
+    public partial class ProcessingJobStatus : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -68,14 +68,19 @@ namespace TraineeManagement.Api.Data.Migrations
                 name: "ProcessingJobs",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    MessageId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     CorrelationId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     SubmissionId = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    SubmissionFileId = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Attempts = table.Column<int>(type: "int", nullable: false),
                     ErrorSummary = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    StartedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    RequestedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    StartedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CompletedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>

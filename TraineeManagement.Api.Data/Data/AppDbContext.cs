@@ -190,5 +190,10 @@ public class AppDbContext : DbContext
                 .HasForeignKey(su => su.SubmissionId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        modelBuilder.Entity<ProcessingJob>()
+            .Property(pj => pj.Status)
+            .HasConversion<string>()
+            .HasMaxLength(20);
     }
 }

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using TraineeManagement.Api.Data.Response;
 using TraineeManagement.Api.Data.ResponseDescriptor;
 

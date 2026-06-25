@@ -1,16 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagement.Api.FileStorageServiceInterface;
-using TraineeManagement.Api.Data.SubmissionFileModel;
-using TraineeManagement.Api.Data.SubmissionModel;
 using TraineeManagement.Api.ResponsesBuilder;
 using TraineeManagement.Api.Data.CustomException;
 using TraineeManagement.Api.Data.ConstRoute;
 using TraineeManagement.Api.Data.Response;
 using TraineeManagement.Api.Data.SubmissionFileDTO;
 using TraineeManagement.Api.SubmissionFileServiceInterface;
-using TraineeManagement.Api.FileStoreValidation;
-using Microsoft.Extensions.Options;
 using TraineeManagement.Api.Contract.SubmissionProcessingContarct;
 using TraineeManagement.Api.Data.DatabaseContext;
 
@@ -40,7 +36,6 @@ public class SubmissionFilesController : ControllerBase
     [HttpPost("/api/submission/{submissionId}/files")]
     public async Task<IActionResult> UploadFile(int submissionId, IFormFile file)
     {
-        System.Console.WriteLine("hi");
         if (!ModelState.IsValid || submissionId < 1)
         {
             return CustomResponseBuilder.CreateValidationErrorResponse();
@@ -77,22 +72,16 @@ public class SubmissionFilesController : ControllerBase
             if (!publishResult.Success)
                 return StatusCode(503, "Submission saved but could not be queued for processing.");
 
-            return Accepted(new
-            {
-                submission = submissionId,
-                message = "Submission accepted for asynchronous processing."
-            });
+            return CustomResponseBuilder.CreateSuccessResponse(
+                CustomResponse.Successlly_Uploaded,
+                publishResult.ProcessingJobId
+            ); 
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to publish submission {SubmissionId} to RabbitMQ", submissionId);
             return StatusCode(503, "Submission saved but could not be queued for processing.");
-        }
-
-        // return CustomResponseBuilder.CreateSuccessResponse(
-        //     AppConstants.ApiResponse.Created,
-        //     submissionFile
-        // );        
+        }       
     }
 
     [HttpGet("{id}/download")] 

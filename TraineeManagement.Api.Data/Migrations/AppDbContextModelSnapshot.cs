@@ -103,9 +103,11 @@ namespace TraineeManagement.Api.Data.Migrations
 
             modelBuilder.Entity("TraineeManagement.Api.Data.ProcessingJobModel.ProcessingJob", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Attempts")
                         .HasColumnType("int");
@@ -119,10 +121,21 @@ namespace TraineeManagement.Api.Data.Migrations
                     b.Property<string>("ErrorSummary")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("StartedAt")
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("RequestedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Status")
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<int>("SubmissionFileId")
                         .HasColumnType("int");
 
                     b.Property<int>("SubmissionId")

@@ -32,6 +32,8 @@ public static class AppConstants
     {
         public const string FileStorage = "FileStorage";
 
+        public const string GetRootPath = "RootPath:Path";
+
     }
 
     public static class RabbitMQ

@@ -20,7 +20,7 @@
 
         private readonly AppDbContext _context;
 
-        public FileStorageService(IWebHostEnvironment env, ILogger<FileStorageService> logger, IOptions<CustomFileStoreValidation> fileConfiguration,AppDbContext context)
+        public FileStorageService(ILogger<FileStorageService> logger, IOptions<CustomFileStoreValidation> fileConfiguration,AppDbContext context)
         {
             _logger = logger;
             _fileConfiguration = fileConfiguration.Value;
@@ -32,7 +32,7 @@
             }
             
             string configuredPath = _fileConfiguration.RootPath; 
-            string basePath = env.ContentRootPath;
+            string basePath = _fileConfiguration.BasePath;
 
             _rootPath = Path.Combine(basePath, configuredPath);
 
@@ -86,14 +86,12 @@
             string storedFileName = $"{datePrefix}/{uniqueId}{ext}"; 
             string diskSafeFileName = storedFileName.Replace("/", "_");
             string filePath = Path.Combine(_rootPath, diskSafeFileName);
-            
             try
             {
                 using FileStream output = new FileStream(filePath, FileMode.Create, FileAccess.Write);
                 using Stream fileStream = file.OpenReadStream();
                 await fileStream.CopyToAsync(output);
-                
-                return diskSafeFileName; 
+                return diskSafeFileName;  
             }
             catch (Exception ex)
             {
