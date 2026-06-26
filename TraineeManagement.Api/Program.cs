@@ -12,6 +12,12 @@ using TraineeManagement.Api.Messaging.RabbitMqConnectionSettings;
 using TraineeManagement.Api.Data.DatabaseContext;
 using TraineeManagement.Api.Data.Constants;
 using TraineeManagement.Api.Messaging.RabbitMqConnection;
+using Polly;
+using Polly.Extensions.Http;
+using TraineeManagement.Api.TraineeService;
+using System.Net;
+using TraineeManagement.Api.TraineeServiceInterface;
+
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +97,43 @@ builder.Services.AddAuthentication(options =>
 });
 
 
+
+var retryPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .OrResult(msg => msg.StatusCode == HttpStatusCode.RequestTimeout)
+    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromMilliseconds(200 * retryAttempt));
+
+var circuitBreakerPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .CircuitBreakerAsync(5, TimeSpan.FromSeconds(15));
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient<ITraineeService,TraineeService>((sp, client) =>
+{
+    IConfiguration config = sp.GetRequiredService<IConfiguration>();
+    string? baseUrl = config["DirectoryService:BaseUrl"];
+    if (string.IsNullOrWhiteSpace(baseUrl))
+        throw new InvalidOperationException("DirectoryService:BaseUrl is not configured");
+
+    client.BaseAddress = new Uri(baseUrl);
+
+    client.Timeout = TimeSpan.FromSeconds(5);
+
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+    // Propagate correlation ID
+    IHttpContextAccessor httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+    string? correlationId = httpContextAccessor.HttpContext?.TraceIdentifier;
+    if (!string.IsNullOrEmpty(correlationId))
+        client.DefaultRequestHeaders.Add("X-Correlation-ID", correlationId);
+})
+.AddPolicyHandler(retryPolicy)
+.AddPolicyHandler(circuitBreakerPolicy);
+
+
+
+// get file storage configuration
 builder.Services.Configure<CustomFileStoreValidation>(
     builder.Configuration.GetSection(AppConstants.ConfigSections.FileStorage)
 );

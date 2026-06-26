@@ -6,6 +6,7 @@ using TraineeManagement.Api.TraineeServiceInterface;
 using TraineeManagement.Api.Data.CustomException;
 using TraineeManagement.Api.Data.CacheKey;
 using TraineeManagement.Api.Data.DatabaseContext;
+using System.Net;
 
 namespace TraineeManagement.Api.TraineeService;
 
@@ -15,11 +16,14 @@ public class TraineeService : ITraineeService
     private readonly ILogger<TraineeService> _logger;
     private readonly ICacheService _cacheService;
 
-    public TraineeService(AppDbContext context, ILogger<TraineeService> logger, ICacheService cacheService)
+    private readonly HttpClient _httpClient;
+
+    public TraineeService(AppDbContext context, ILogger<TraineeService> logger, ICacheService cacheService,HttpClient httpClient)
     {
         _context = context;
         _logger = logger;
         _cacheService = cacheService;
+        _httpClient = httpClient;
     }
 
     private TraineeResponseDto MapToResponseDto(Trainee trainee)
@@ -50,29 +54,31 @@ public class TraineeService : ITraineeService
         return trainees;
     }
 
-    public async Task<TraineeResponseDto> GetTraineeByIdAsync(int id)
+    public async Task<TraineeResponseDto?> GetTraineeByIdAsync(int id,CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Retrieving trainee profile with ID: {TraineeId}", id);
+        _logger.LogDebug("Retrieving trainee profile with ID: {TraineeId}", id); 
+ 
+        _logger.LogInformation("Executing synchronous HTTP GET request for TraineeId={TraineeId}", id);
 
-        TraineeResponseDto? cached = await _cacheService.GetAsync<TraineeResponseDto>(CacheKey.Trainee(id));
-        if (cached is not null)
-            return cached;
+        HttpResponseMessage response = await _httpClient.GetAsync($"/api/directory/trainee/{id}", cancellationToken);
 
-        TraineeResponseDto? dto = await _context.Trainees
-            .AsNoTracking()
-            .Where(t => t.Id == id)
-            .Select(t => new TraineeResponseDto(t.Id, t.FirstName, t.LastName))
-            .FirstOrDefaultAsync();
-
-        if (dto == null)
+        if (response.IsSuccessStatusCode)
         {
-            _logger.LogWarning("Trainee with ID {TraineeId} was not found during target DTO projection.", id);
-            throw new NotFoundException("Trainee");
+            return await response.Content.ReadFromJsonAsync<TraineeResponseDto>(cancellationToken: cancellationToken);
         }
 
-        await _cacheService.SetAsync(CacheKey.Trainee(id), dto, TimeSpan.FromMinutes(10));
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            throw new NotFoundException();
+        }
 
-        return dto;
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            throw new BadRequestException("Validation Failed");
+        }
+
+        _logger.LogError("Directory Service returned {StatusCode} for trainee {TraineeId}", response.StatusCode, id);
+        throw new HttpRequestException($"Unexpected status code: {response.StatusCode}");
     }
 
     public async Task<TraineeResponseDto> CreateTraineeAsync(TraineeCreateDto createTraineeDto)

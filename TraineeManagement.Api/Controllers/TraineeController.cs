@@ -24,7 +24,7 @@ public class TraineesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetTraineeById(int id)
+    public async Task<ActionResult> GetTraineeById(int id,CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid || id < 1)
         {
@@ -32,7 +32,7 @@ public class TraineesController : ControllerBase
         }
         _logger.LogDebug("Invoking trainee service to retrieve profile for TraineeId: {TraineeId}", id);
         
-        TraineeResponseDto trainee = await _traineeService.GetTraineeByIdAsync(id);
+        TraineeResponseDto? trainee = await _traineeService.GetTraineeByIdAsync(id,cancellationToken);
         
         return CustomResponseBuilder.CreateSuccessResponse(
             CustomResponse.Success,

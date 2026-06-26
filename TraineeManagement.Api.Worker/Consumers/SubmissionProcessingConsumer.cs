@@ -112,51 +112,6 @@ public class SubmissionProcessingConsumer : BackgroundService
         IServiceScope scope = _scopeFactory.CreateScope();
         AppDbContext dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-
-
-
-
-
-
-
-
-
-
-        _logger.LogInformation("Resolving internal remote data context profiles...");
-
-    // 1. Resolve your typed HTTP client from the scoped provider
-    TrainingDirectoryClient directoryClient = scope.ServiceProvider.GetRequiredService<TrainingDirectoryClient>();
-
-    [cite_start]// 2. Call the service and propagate the cancellation token safely 
-    TraineeProfileDto? traineeProfile = await directoryClient.GetTraineeProfileAsync(assignment.TraineeId, stoppingToken);
-
-    [cite_start]// 3. Handle fallback processing if the service is down [cite: 423]
-    if (traineeProfile == null)
-    {
-        _logger.LogWarning("Fallback behavior activated: Remote profile service returned null. Processing with local database system states.");
-        [cite_start]// Your fallback behavior logic goes here (e.g., continue processing with fallback values) [cite: 423]
-    }
-    else
-    {
-        _logger.LogInformation("Successfully matched profile info data from remote service for: {FullName} ({TrainingStatus})", 
-            traineeProfile.FullName, traineeProfile.TrainingStatus);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         ProcessingJob? existingJob = await dbContext.ProcessingJobs
             .FirstOrDefaultAsync(j => j.Id == message.ProcessingJobId, stoppingToken);
 

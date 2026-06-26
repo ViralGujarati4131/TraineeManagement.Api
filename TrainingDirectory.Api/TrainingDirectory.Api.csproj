@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\TraineeManagement.Api.Contract\TraineeManagement.Api.Contract.csproj" />
+    <ProjectReference Include="..\TraineeManagement.Api.Data\TraineeManagement.Api.Data.csproj" />
+    <ProjectReference Include="..\TraineeManagement.Api\TraineeManagement.Api.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

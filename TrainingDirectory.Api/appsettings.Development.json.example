@@ -1,0 +1,8 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "server=127.0.0.1;port=<mysql_port>;database=<db_name>;user=root;password=<docker_mysql_password>;"
+  },
+  "Redis": {
+    "ConnectionString": "localhost:<docker_redis_port>"
+  }
+}

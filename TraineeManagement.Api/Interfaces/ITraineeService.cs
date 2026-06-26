@@ -6,7 +6,7 @@ public interface ITraineeService
 {
     Task<IEnumerable<TraineeResponseDto>> GetTraineesAsync();
 
-    Task<TraineeResponseDto> GetTraineeByIdAsync(int id);
+    Task<TraineeResponseDto?> GetTraineeByIdAsync(int id,CancellationToken cancellationToken);
 
     Task<TraineeResponseDto> CreateTraineeAsync(TraineeCreateDto createTraineeDto);
 

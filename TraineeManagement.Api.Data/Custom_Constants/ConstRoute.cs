@@ -14,4 +14,5 @@ public static class CustomConstRoute
     public const string PaginationSearch = "paginationSearch";
     public const string ProcessingJob = "api/processing-jobs";
     public const string Login = "login";
+    public const string DirectoryTrainee = "/api/directory/trainee";
 }

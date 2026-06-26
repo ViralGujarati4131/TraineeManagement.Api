@@ -28,7 +28,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddScoped<ITraineeService, TraineeService>();
+        // services.AddScoped<ITraineeService, TraineeService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IMentorServices, MentorService>();
