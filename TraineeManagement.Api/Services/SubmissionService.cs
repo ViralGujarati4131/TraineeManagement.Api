@@ -106,7 +106,7 @@ public class SubmissionService : ISubmissionService
             throw new NotFoundException(CustomResponse.NotFound,"Submission");
         }
         
-        await _cacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(10));
+        await _cacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(CacheTime.TTL));
 
         _logger.LogInformation("State check: Bulk fetch submissions success. Id: {SubmissionId}", id);
         return dto;

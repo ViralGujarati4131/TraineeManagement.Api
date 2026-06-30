@@ -18,7 +18,7 @@ public class TaskAssignmentService : ITaskAssignmentService
     private readonly ILogger<TaskAssignmentService> _logger;
     private readonly ICacheService _cacheService;
 
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(CacheTime.TTL);
 
     public TaskAssignmentService(AppDbContext context, ILogger<TaskAssignmentService> logger, ICacheService cacheService)
     {

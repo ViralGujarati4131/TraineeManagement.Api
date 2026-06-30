@@ -11,11 +11,9 @@ using TraineeManagement.Api.CorrelationIdMiddleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Setup structural bootstrapper logger
 using ILoggerFactory loggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
 ILogger logger = loggerFactory.CreateLogger("Program");
 
-logger.LogInformation("Initializing application setup.");
 
 const string AllowedOriginsPolicy = "_myAllowSpecificOrigins";
 
@@ -23,7 +21,6 @@ const string AllowedOriginsPolicy = "_myAllowSpecificOrigins";
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 MySqlServerVersion serverVersion = new MySqlServerVersion(new Version(8, 0, 46));
 
-logger.LogInformation("Configuring database context. Version: {ServerVersion}", serverVersion);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, serverVersion)
 );
@@ -63,7 +60,6 @@ builder.Services.AddControllers()
 
 WebApplication app = builder.Build();
 
-logger.LogInformation("State transition: Building application pipeline.");
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -72,5 +68,4 @@ app.UseCors(AllowedOriginsPolicy);
 app.UseAuthorization();
 app.MapControllers();
 
-logger.LogInformation("State transition: Starting host application.");
 app.Run();

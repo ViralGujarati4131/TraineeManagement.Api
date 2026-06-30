@@ -1,4 +1,7 @@
 using StackExchange.Redis;
+using TraineeManagement.Api.Data.Constants;
+using TraineeManagement.Api.Data.CustomException;
+using TraineeManagement.Api.Data.Response;
 
 namespace TraineeManagement.Api.Configuration;
 
@@ -10,7 +13,11 @@ public static class RedisConnection
         
         services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
-            string connectionString = configuration["Redis:ConnectionString"]!;
+            string? connectionString = configuration[AppConstants.ConfigSections.GetRedisConnection];
+
+            if(connectionString == null)
+             throw new ConfigurationMissingException(CustomResponse.ConfigurationMissingError);
+             
             return ConnectionMultiplexer.Connect(connectionString);
         });
 

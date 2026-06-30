@@ -34,6 +34,42 @@ public static class AppConstants
 
         public const string GetRootPath = "RootPath:Path";
 
+        public const string GetFrontendCors = "Cors:AllowedOrigins";
+
+        public const string GetRedisConnection = "Redis:ConnectionString";
+
+        public const string GetRabbitMqSettings = "RabbitMQ";
+
+        public const string GetDbConnection = "ConnectionStrings:DefaultConnection";
+
+        public static readonly Version MySqlVersion = new Version(8, 0, 46);
+
+        public const string GetMicroServiceUrl = "DirectoryService:BaseUrl";
+
+        public const string GetMicroServiceHealthRoute = "/api/health";
+
+        public const string HealthCheckLivenessRoute = "/health/live";
+
+        public const string HealthCheckReadinessRoute = "/health/ready";
+
+        public const string HealthReady = "ready";
+
+        public const string HealthUnavailable = "unavailable";
+
+         public const string GetJwt = "JWT";
+
+        public const string JwtKey = "Key";
+
+        public const string JwtIssuer = "Issuer";
+
+        public const string JwtAudience = "Audience";
+
+        public const string JwtExpiryMinute = "ExpiryMinutes";
+
+        public const string ContentType = "application/json";
+
+        public const string CorrelationIdHeaderName = "X-Correlation-ID";
+
     }
 
     public static class RabbitMQ

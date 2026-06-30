@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using TraineeManagement.Api.Data.Constants;
 using TraineeManagement.Api.Data.CustomException;
 using TraineeManagement.Api.Data.Response;
 
@@ -10,8 +11,8 @@ public static class AuthJwtToken
 {
     public static IServiceCollection AddJwtAuth(this IServiceCollection services, IConfiguration configuration)
     {
-        IConfigurationSection jwtSettings = configuration.GetSection("JWT");
-        string jwtKeyString = jwtSettings["Key"] ?? throw new ConfigurationMissingException(CustomResponse.ConfigurationMissingError);
+        IConfigurationSection jwtSettings = configuration.GetSection(AppConstants.ConfigSections.GetJwt);
+        string jwtKeyString = jwtSettings[AppConstants.ConfigSections.JwtKey] ?? throw new ConfigurationMissingException(CustomResponse.ConfigurationMissingError);
         byte[] tokenSigningKey = Encoding.UTF8.GetBytes(jwtKeyString);
 
         services.AddAuthentication(options =>
@@ -27,8 +28,8 @@ public static class AuthJwtToken
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidAudience = jwtSettings["Audience"],
+                ValidIssuer = jwtSettings[AppConstants.ConfigSections.JwtIssuer],
+                ValidAudience = jwtSettings[AppConstants.ConfigSections.JwtAudience],
                 IssuerSigningKey = new SymmetricSecurityKey(tokenSigningKey)
             };
         });

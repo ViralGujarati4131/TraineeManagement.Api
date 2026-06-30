@@ -63,56 +63,55 @@ public class TraineeServices : ITraineeService
     }
 
     public async Task<TraineeResponseDto?> GetTraineeByIdAsync(int id, CancellationToken cancellationToken)
-{
-    string correlationId = _correlationIdAccessor.Get();
-    string cacheKey = CacheKey.Trainee(id);
-
-    TraineeResponseDto? cached = await _cacheService.GetAsync<TraineeResponseDto>(cacheKey);
-    if (cached is not null)
     {
-        _logger.LogDebug("Cache hit. CacheKey: {CacheKey}, CorrelationId: {CorrelationId}", cacheKey, correlationId);
-        return cached;
-    }
+        string cacheKey = CacheKey.Trainee(id);
 
-    _logger.LogDebug("Cache miss. CacheKey: {CacheKey}, CorrelationId: {CorrelationId}", cacheKey, correlationId);
-    _logger.LogInformation("Executing HTTP GET. TraineeId: {TraineeId}, CorrelationId: {CorrelationId}", id, correlationId);
-
-    try
-    {
-        HttpResponseMessage response = await _httpClient.GetAsync($"/api/directory/trainee/{id}", cancellationToken);
-
-        if (response.IsSuccessStatusCode)
+        TraineeResponseDto? cached = await _cacheService.GetAsync<TraineeResponseDto>(cacheKey);
+        if (cached is not null)
         {
-            InterServiceCommunicationResponse<TraineeResponseDto>? responseData = await response.Content.ReadFromJsonAsync<InterServiceCommunicationResponse<TraineeResponseDto>>(
-                new JsonSerializerOptions(JsonSerializerDefaults.Web),
-                cancellationToken
-            );
+            _logger.LogDebug("Cache hit");
+            return cached;
+        }
 
-            if (responseData is null || responseData.Data is null)
+        _logger.LogDebug("Cache miss.");
+        _logger.LogInformation("Executing HTTP GET. TraineeId: {TraineeId}", id);
+
+        try
+        {
+            HttpResponseMessage response = await _httpClient.GetAsync($"/api/directory/trainee/{id}", cancellationToken);
+
+            if (response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Dependency failure: Empty body payload. TraineeId: {TraineeId}, CorrelationId: {CorrelationId}", id, correlationId);
-                throw new NotFoundException(CustomResponse.NotFound);
+                InterServiceCommunicationResponse<TraineeResponseDto>? responseData = await response.Content.ReadFromJsonAsync<InterServiceCommunicationResponse<TraineeResponseDto>>(
+                    new JsonSerializerOptions(JsonSerializerDefaults.Web),
+                    cancellationToken
+                );
+
+                if (responseData is null || responseData.Data is null)
+                {
+                    _logger.LogWarning("Dependency failure: Empty body payload. TraineeId: {TraineeId}",id);
+                    throw new NotFoundException(CustomResponse.NotFound);
+                }
+
+                TraineeResponseDto trainee = responseData.Data;
+                await _cacheService.SetAsync(cacheKey, trainee, TimeSpan.FromMinutes(CacheTime.TTL));
+
+                _logger.LogInformation("HTTP GET success. TraineeId: {TraineeId}", id);
+                return trainee;
             }
-
-            TraineeResponseDto trainee = responseData.Data;
-            await _cacheService.SetAsync(cacheKey, trainee, TimeSpan.FromMinutes(10));
-
-            _logger.LogInformation("HTTP GET success. TraineeId: {TraineeId}, CorrelationId: {CorrelationId}", id, correlationId);
-            return trainee;
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.LogWarning("Dependency failure: Remote resource missing. TraineeId: {TraineeId}", id);
+                throw new NotFoundException(CustomResponse.NotFound, "Trainee");
+            }
         }
-        else if (response.StatusCode == HttpStatusCode.NotFound)
+        catch
         {
-            _logger.LogWarning("Dependency failure: Remote resource missing. TraineeId: {TraineeId}, CorrelationId: {CorrelationId}", id, correlationId);
-            throw new NotFoundException(CustomResponse.NotFound, "Trainee");
+            throw;
         }
-    }
-    catch
-    {
-        throw;
-    }
 
-    return null;
-}
+        return null;
+    }
 
     public async Task<TraineeResponseDto> CreateTraineeAsync(TraineeCreateDto createTraineeDto)
     {

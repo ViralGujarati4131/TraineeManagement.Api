@@ -74,7 +74,7 @@ public class LearningTaskService : ILearningTaskService
                 Lt.Status
             )).ToListAsync();
         
-        await _cacheService.SetAsync(cacheKey, learningTasks, TimeSpan.FromMinutes(10));
+        await _cacheService.SetAsync(cacheKey, learningTasks, TimeSpan.FromMinutes(CacheTime.TTL));
 
         return learningTasks;
     }

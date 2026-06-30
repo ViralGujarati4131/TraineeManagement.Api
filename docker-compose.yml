@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:8.0.46
+    image: docker-registry-002.zeuslearning.com/zeuslearning/mysql:8.0.41
     container_name: dotnetmysqldb
     restart: unless-stopped
     environment:
@@ -19,7 +19,7 @@ services:
       start_period: 30s
 
   redis-cache:
-    image: redis:7.0.11-alpine
+    image: docker-registry-002.zeuslearning.com/zeuslearning/redis:alpine
     container_name: dotnetrediscache
     restart: unless-stopped
     ports:
@@ -32,7 +32,7 @@ services:
       start_period: 10s
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: docker-registry-002.zeuslearning.com/zeuslearning/rabbitmq:3-management
     container_name: dotnetrabbitmq
     restart: unless-stopped
     environment:
@@ -69,6 +69,7 @@ services:
       RabbitMQ__Password: ${RABBITMQ_DEFAULT_PASS}
       RabbitMQ__VirtualHost: ${RABBITMQ_DEFAULT_VHOST}
       Jwt__Key: ${JWT_SECRET}
+      Cors__AllowedOrigins: "http://localhost:3000"
       DirectoryService__BaseUrl: http://trainingdirectory-api:8080/api/
       FileStorage__BasePath: /app/Uploads
     volumes:
@@ -117,11 +118,23 @@ services:
       - "5278:8080"
     environment:
       ASPNETCORE_ENVIRONMENT : ${ASPNETCORE_ENVIRONMENT:-Production}
+      Cors__AllowedRequest: "http://localhost:5299"
       ConnectionStrings__DefaultConnection: Server=db;Port=3306;Database=${MYSQL_DATABASE};User=root;Password=${MYSQL_ROOT_PASSWORD};
     depends_on:
       db:
         condition: service_healthy
 
+  ui-dashboard:
+    image: docker-registry-002.zeuslearning.com/zeuslearning/portainer/portainer-ce:sts
+    container_name: portainer-ui
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: always
+ 
 volumes:
   dotnetmysqldb:
   dotnetrabbitmq:
+  portainer_data:

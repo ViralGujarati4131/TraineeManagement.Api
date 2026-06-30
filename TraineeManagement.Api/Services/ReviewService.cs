@@ -89,7 +89,7 @@ public class ReviewService : IReviewService
                 r.ReviewedDate
             )).ToListAsync();
         
-        await _cacheService.SetAsync(cacheKey, reviews, TimeSpan.FromMinutes(10));
+        await _cacheService.SetAsync(cacheKey, reviews, TimeSpan.FromMinutes(CacheTime.TTL));
 
         return reviews;
     }

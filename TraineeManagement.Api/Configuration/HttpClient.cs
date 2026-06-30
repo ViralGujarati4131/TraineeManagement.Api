@@ -69,6 +69,17 @@ public static class HttpClient
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromSeconds(5); 
             client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+            const string HeaderName = "X-Correlation-ID";
+            IHttpContextAccessor httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+            string? correlationId = httpContextAccessor.HttpContext?.Items[HeaderName]?.ToString();
+            if (!string.IsNullOrWhiteSpace(correlationId))
+            {
+                if (!client.DefaultRequestHeaders.Contains(HeaderName))
+                {
+                    client.DefaultRequestHeaders.Add(HeaderName, correlationId);
+                }
+            }
         })
         .AddPolicyHandler(fallbackPolicy)      
         .AddPolicyHandler(retryPolicy)       

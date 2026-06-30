@@ -1,6 +1,7 @@
 using TraineeManagement.Api.Messaging.RabbitMQPublisher;
 using TraineeManagement.Api.Messaging.RabbitMqConnection;
 using TraineeManagement.Api.Messaging.RabbitMqConnectionSettings;
+using TraineeManagement.Api.Data.Constants;
 
 namespace TraineeManagement.Api.Configuration;
 
@@ -9,7 +10,7 @@ public static class RabbitMqConnection
     public static IServiceCollection AddRabbitMqConnection(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<RabbitConnection>();
-        services.Configure<RabbitMqSettings>(configuration.GetSection("RabbitMQ"));
+        services.Configure<RabbitMqSettings>(configuration.GetSection(AppConstants.ConfigSections.GetRabbitMqSettings));
         services.AddSingleton<RabbitMqService>();
 
         return services;

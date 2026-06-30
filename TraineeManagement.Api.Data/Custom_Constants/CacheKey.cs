@@ -15,3 +15,8 @@ public static class CacheKey
     public static string AllReview() => $"review:All";
 
 }
+
+public static class CacheTime
+{
+    public static int TTL = 10;
+}

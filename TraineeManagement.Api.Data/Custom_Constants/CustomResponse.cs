@@ -97,9 +97,18 @@ namespace TraineeManagement.Api.Data.Response;
     public static readonly CustomResponseDescriptor IOFail = 
         new(500, "5005", "Exception occur while doing the IO Operation");
     
-     public static readonly CustomResponseDescriptor ChannelNotInitialized = 
+    public static readonly CustomResponseDescriptor ChannelNotInitialized = 
         new(500, "5006", "Channel is not initialized.");
 
     public static readonly CustomResponseDescriptor UnavailableRabbitMQService = 
         new(503, "5007", "Submission saved but could not be queued for processing.");
+
+    public static readonly CustomResponseDescriptor RequestTimeOut = 
+        new(504, "5008", "Upstream service timed out.");
+    
+    public static readonly CustomResponseDescriptor ServiceTemporaryUnavailable = 
+        new(503, "5009", "Upstream service temporarily unavailable.");
+
+    public static readonly CustomResponseDescriptor MicroServiceUnreachable = 
+        new(502, "5010", "Upstream service unreachable.");
 }

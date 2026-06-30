@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using TraineeManagement.Api.Data.Constants;
 using TraineeManagement.Api.Messaging.RabbitMqConnection;
 
 namespace TraineeManagement.Api.Configuration;
@@ -10,11 +11,11 @@ public static class HealthCheck
     {
         services.AddHealthChecks()
             .AddMySql(
-                connectionString: configuration["ConnectionStrings:DefaultConnection"]!,
+                connectionString: configuration[AppConstants.ConfigSections.GetDbConnection]!,
                 name: "mysql",
                 tags: ["readiness", "db"])
             .AddRedis(
-                redisConnectionString: configuration["Redis:ConnectionString"]!,
+                redisConnectionString: configuration[AppConstants.ConfigSections.GetRedisConnection]!,
                 name: "redis",
                 tags: ["readiness", "cache"])
             .AddRabbitMQ(
@@ -26,7 +27,7 @@ public static class HealthCheck
                 name: "rabbitmq",
                 tags: ["readiness", "messaging"])
             .AddUrlGroup(
-                uri: new Uri(configuration["DirectoryService:BaseUrl"] + "/api/health"),
+                uri: new Uri(configuration[AppConstants.ConfigSections.GetMicroServiceUrl] + AppConstants.ConfigSections.GetMicroServiceHealthRoute),
                 name: "directory-service",
                 tags: ["readiness", "upstream"]);
 
@@ -35,13 +36,13 @@ public static class HealthCheck
 
     public static WebApplication MapAppHealthChecks(this WebApplication app)
     {
-        app.MapHealthChecks("/health/live", new HealthCheckOptions
+        app.MapHealthChecks(AppConstants.ConfigSections.HealthCheckLivenessRoute, new HealthCheckOptions
         {
             Predicate = _ => false,
             ResponseWriter = WriteHealthResponse
         });
 
-        app.MapHealthChecks("/health/ready", new HealthCheckOptions
+        app.MapHealthChecks(AppConstants.ConfigSections.HealthCheckReadinessRoute, new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("readiness"),
             ResponseWriter = WriteHealthResponse
@@ -52,10 +53,10 @@ public static class HealthCheck
 
     private static Task WriteHealthResponse(HttpContext context, HealthReport report)
     {
-        context.Response.ContentType = "application/json";
+        context.Response.ContentType = AppConstants.ConfigSections.ContentType;
         return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new
         {
-            Status = report.Status == HealthStatus.Healthy ? "ready" : "unavailable",
+            Status = report.Status == HealthStatus.Healthy ? AppConstants.ConfigSections.HealthReady : AppConstants.ConfigSections.HealthUnavailable,
             Timestamp = DateTime.UtcNow
         }));
     }

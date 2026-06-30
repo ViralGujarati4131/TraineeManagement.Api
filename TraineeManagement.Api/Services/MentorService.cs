@@ -60,7 +60,7 @@ public class MentorService : IMentorServices
             .Select(m => new MentorResponseDto(m.Id, m.FirstName, m.LastName))
             .ToListAsync();
 
-        await _cacheService.SetAsync(cacheKey, mentors, TimeSpan.FromMinutes(10));
+        await _cacheService.SetAsync(cacheKey, mentors, TimeSpan.FromMinutes(CacheTime.TTL));
 
         return mentors;
     }

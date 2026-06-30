@@ -30,11 +30,11 @@ public class JwtService : IJwtService
     {
         _logger.LogInformation("Generating token parameters. UserId: {UserId}", user.Id);
 
-        IConfigurationSection jwtSettings = _configuration.GetSection("Jwt");
+        IConfigurationSection jwtSettings = _configuration.GetSection(AppConstants.ConfigSections.GetJwt);
         
-        string secretKey = jwtSettings["Key"] ?? throw new ConfigurationMissingException(CustomResponse.ConfigurationMissingError);
+        string secretKey = jwtSettings[AppConstants.ConfigSections.JwtKey] ?? throw new ConfigurationMissingException(CustomResponse.ConfigurationMissingError);
 
-        if (!int.TryParse(jwtSettings["ExpiryMinutes"], out expiryMinutes))
+        if (!int.TryParse(jwtSettings[AppConstants.ConfigSections.JwtExpiryMinute], out expiryMinutes))
         {
             expiryMinutes = AppConstants.Security.DefaultExpiryMinutes;
         }
@@ -53,8 +53,8 @@ public class JwtService : IJwtService
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
-            Issuer = jwtSettings["Issuer"],
-            Audience = jwtSettings["Audience"],
+            Issuer = jwtSettings[AppConstants.ConfigSections.JwtIssuer],
+            Audience = jwtSettings[AppConstants.ConfigSections.JwtAudience],
             SigningCredentials = credentials
         };
 

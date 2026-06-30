@@ -9,7 +9,7 @@ public static class SerilogConfiguration
     {
         builder.Host.UseSerilog((context, services, configuration) => configuration
             .ReadFrom.Configuration(context.Configuration)  
-            .Enrich.FromLogContext()                            // overrides above during requests
+            .Enrich.FromLogContext()                           
             .WriteTo.Conditional(
                 evt => evt.Properties.TryGetValue("SourceContext", out LogEventPropertyValue? src)
                        && src.ToString().Contains("RequestLoggingMiddleware"),
