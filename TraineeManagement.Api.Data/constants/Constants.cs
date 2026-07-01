@@ -35,6 +35,8 @@ public static class AppConstants
         public const string GetRootPath = "RootPath:Path";
 
         public const string GetFrontendCors = "Cors:AllowedOrigins";
+        
+        public const string GetMicroServiceCors = "Cors:AllowedRequest";
 
         public const string GetRedisConnection = "Redis:ConnectionString";
 

@@ -1,4 +1,4 @@
-using TraineeManagement.Api.Messaging.RabbitMQPublisher;
+
 using TraineeManagement.Api.Messaging.RabbitMqConnection;
 using TraineeManagement.Api.Messaging.RabbitMqConnectionSettings;
 using TraineeManagement.Api.Data.Constants;
@@ -11,7 +11,6 @@ public static class RabbitMqConnection
     {
         services.AddSingleton<RabbitConnection>();
         services.Configure<RabbitMqSettings>(configuration.GetSection(AppConstants.ConfigSections.GetRabbitMqSettings));
-        services.AddSingleton<RabbitMqService>();
 
         return services;
     }

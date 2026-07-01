@@ -1,6 +1,6 @@
 services:
   db:
-    image: docker-registry-002.zeuslearning.com/zeuslearning/mysql:8.0.41
+    image: mysql:8.0.46
     container_name: dotnetmysqldb
     restart: unless-stopped
     environment:
@@ -19,7 +19,7 @@ services:
       start_period: 30s
 
   redis-cache:
-    image: docker-registry-002.zeuslearning.com/zeuslearning/redis:alpine
+    image: redis:7.0.11-alpine
     container_name: dotnetrediscache
     restart: unless-stopped
     ports:
@@ -32,7 +32,7 @@ services:
       start_period: 10s
 
   rabbitmq:
-    image: docker-registry-002.zeuslearning.com/zeuslearning/rabbitmq:3-management
+    image: rabbitmq:3-management
     container_name: dotnetrabbitmq
     restart: unless-stopped
     environment:
@@ -125,7 +125,7 @@ services:
         condition: service_healthy
 
   ui-dashboard:
-    image: docker-registry-002.zeuslearning.com/zeuslearning/portainer/portainer-ce:sts
+    image: portainer/portainer-ce:sts
     container_name: portainer-ui
     ports:
       - "9000:9000"

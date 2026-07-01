@@ -42,7 +42,7 @@ namespace TraineeManagement.Api.Messaging.RabbitMqConnection
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Dependency failure opening rabbitmq connection.");
-                throw;
+                throw new OperationException(CustomResponse.ConnectionNotInitialized);
             }
         }
 
@@ -51,7 +51,7 @@ namespace TraineeManagement.Api.Messaging.RabbitMqConnection
             if(_connection == null)
             {
                 _logger.LogError("Dependency failure: RabbitMq connection uninitialized.");
-                throw new NotFoundException(CustomResponse.NotFound);
+                throw new OperationException(CustomResponse.ConnectionNotInitialized);
             }
                 
             using IChannel _channel = await _connection.CreateChannelAsync();

@@ -5,6 +5,8 @@ using TraineeManagement.Api.Contract.SubmissionProcessingContarct;
 using TraineeManagement.Api.Messaging.RabbitMqConnection;
 using RabbitMQ.Client;
 using TraineeManagement.Api.Data.Constants;
+using TraineeManagement.Api.Data.Response;
+using TraineeManagement.Api.Data.CustomException;
 
 namespace TraineeManagement.Api.Messaging.RabbitMQPublisher;
 
@@ -29,7 +31,7 @@ public class RabbitMqService
                 "Dependency failure: RabbitMQ publish failed. Reason: {Reason}. CorrelationId: {CorrelationId}",
                 "Connection unavailable",
                 message.CorrelationId);
-            return;
+            return;throw new OperationException(CustomResponse.ChannelNotInitialized);
         }
 
         CreateChannelOptions channelOptions = new CreateChannelOptions(
@@ -45,7 +47,7 @@ public class RabbitMqService
                 "Dependency failure: RabbitMQ channel creation failed. Reason: {Reason}. CorrelationId: {CorrelationId}",
                 "Channel unavailable",
                 message.CorrelationId);
-            return;
+            throw new OperationException(CustomResponse.ChannelNotInitialized);
         }
 
         byte[] body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));

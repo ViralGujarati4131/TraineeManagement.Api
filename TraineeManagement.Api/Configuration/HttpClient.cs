@@ -8,6 +8,7 @@ using Polly.Retry;
 using Polly.CircuitBreaker;
 using Polly.Fallback;
 using Polly.Extensions.Http;
+using TraineeManagement.Api.Data.Constants;
 
 namespace TraineeManagement.Api.Configuration;
 
@@ -59,7 +60,7 @@ public static class HttpClient
 
         services.AddHttpClient<ITraineeService, TraineeServices>((sp, client) =>
         {
-            string? baseUrl = configuration["DirectoryService:BaseUrl"];
+            string? baseUrl = configuration[AppConstants.ConfigSections.GetMicroServiceUrl];
             if (string.IsNullOrWhiteSpace(baseUrl))
             {
                 logger.LogCritical("Dependency failure: Base address missing for Directory TraineeService configuration lookup.");

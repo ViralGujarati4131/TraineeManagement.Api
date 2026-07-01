@@ -20,6 +20,7 @@ using TraineeManagement.Api.JwtService;
 using TraineeManagement.Api.ProcessingJobService;
 using TraineeManagement.Api.ProcessingJobServiceInterface;
 using TraineeManagement.Api.CorrelationId;
+using TraineeManagement.Api.Messaging.RabbitMQPublisher;
 
 namespace Microsoft.Extensions.DependencyInjection; 
 
@@ -39,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IProcessingJobService,ProcessingJobService>();
         services.AddScoped<ICorrelationIdAccessor,CorrelationIdAccessor>();
+        services.AddSingleton<RabbitMqService>();
 
         return services;
     }

@@ -111,4 +111,7 @@ namespace TraineeManagement.Api.Data.Response;
 
     public static readonly CustomResponseDescriptor MicroServiceUnreachable = 
         new(502, "5010", "Upstream service unreachable.");
+
+    public static readonly CustomResponseDescriptor ConnectionNotInitialized = 
+        new(500, "5011", "RabbitMq connection is not initialized.");
 }

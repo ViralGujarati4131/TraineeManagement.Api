@@ -16,7 +16,7 @@ public static class RedisConnection
             string? connectionString = configuration[AppConstants.ConfigSections.GetRedisConnection];
 
             if(connectionString == null)
-             throw new ConfigurationMissingException(CustomResponse.ConfigurationMissingError);
+                throw new ConfigurationMissingException(CustomResponse.ConfigurationMissingError);
              
             return ConnectionMultiplexer.Connect(connectionString);
         });

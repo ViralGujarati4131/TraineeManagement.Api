@@ -6,7 +6,6 @@ using TraineeManagement.Api.Data.CustomException;
 using TraineeManagement.Api.Data.UserModel;
 using TraineeManagement.Api.Data.Constants;
 using TraineeManagement.Api.Data.Response;
-using TraineeManagement.Api.ResponsesBuilder;
 
 namespace TraineeManagement.Api.JwtService;
 

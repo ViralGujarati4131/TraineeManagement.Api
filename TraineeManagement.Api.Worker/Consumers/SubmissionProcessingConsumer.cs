@@ -59,7 +59,7 @@ public class SubmissionProcessingConsumer : BackgroundService
         if (connection == null || !connection.IsOpen)
         {
             _logger.LogError("RabbitMQ underlying connection is down or uninitialized.");
-            return;
+            throw new OperationException(CustomResponse.ConnectionNotInitialized);
         }
 
         await using IChannel _channel = await connection.CreateChannelAsync();
@@ -70,7 +70,7 @@ public class SubmissionProcessingConsumer : BackgroundService
         if (channel is null)
         {
             _logger.LogError("RabbitMQ channel failed to initialize for queue: {Queue}", QueueName);
-            return;
+            throw new OperationException(CustomResponse.ChannelNotInitialized);
         }
 
         await channel.BasicQosAsync(
